@@ -1,0 +1,55 @@
+<svg width="2400" height="1350" viewBox="0 0 2400 1350" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="2400" height="1350" rx="44" fill="#F4F3EF"/>
+  <rect x="72" y="72" width="2256" height="1206" rx="36" fill="#FFFFFF" stroke="#D9D6CF" stroke-width="3"/>
+  <text x="150" y="185" fill="#1D1D1B" font-family="Arial, Helvetica, sans-serif" font-size="68" font-weight="700">Final System</text>
+  <text x="150" y="248" fill="#77746E" font-family="Arial, Helvetica, sans-serif" font-size="28">Problem → Signage Redesign → Campus Map → Mobile UI → QR Access</text>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <g transform="translate(145 430)">
+      <rect width="330" height="300" rx="28" fill="#F8F8F6" stroke="#D9D6CF" stroke-width="3"/>
+      <text x="40" y="90" fill="#1D1D1B" font-size="36" font-weight="700">Problem</text>
+      <text x="40" y="150" fill="#77746E" font-size="25">信息层级混乱</text>
+      <text x="40" y="195" fill="#77746E" font-size="25">方向感缺失</text>
+      <text x="40" y="240" fill="#77746E" font-size="25">指引不连续</text>
+    </g>
+    <g transform="translate(585 430)">
+      <rect width="330" height="300" rx="28" fill="#F8F8F6" stroke="#D9D6CF" stroke-width="3"/>
+      <text x="40" y="90" fill="#1D1D1B" font-size="36" font-weight="700">Strategy</text>
+      <text x="40" y="150" fill="#77746E" font-size="25">信息分层</text>
+      <text x="40" y="195" fill="#77746E" font-size="25">视觉统一</text>
+      <text x="40" y="240" fill="#77746E" font-size="25">线上线下连接</text>
+    </g>
+    <g transform="translate(1025 430)">
+      <rect width="330" height="300" rx="28" fill="#F8F8F6" stroke="#D9D6CF" stroke-width="3"/>
+      <text x="40" y="90" fill="#1D1D1B" font-size="36" font-weight="700">Signage</text>
+      <rect x="42" y="135" width="238" height="68" rx="10" fill="#1D1D1B"/>
+      <text x="72" y="181" fill="#FFFFFF" font-size="34" font-weight="700">C 2F →</text>
+      <text x="40" y="250" fill="#77746E" font-size="25">楼层 / 房间 / 功能图标</text>
+    </g>
+    <g transform="translate(1465 430)">
+      <rect width="330" height="300" rx="28" fill="#F8F8F6" stroke="#D9D6CF" stroke-width="3"/>
+      <text x="40" y="90" fill="#1D1D1B" font-size="36" font-weight="700">Mobile UI</text>
+      <rect x="108" y="120" width="112" height="154" rx="24" fill="#1D1D1B"/>
+      <rect x="124" y="145" width="80" height="104" rx="14" fill="#F5F3EA"/>
+    </g>
+    <g transform="translate(1905 430)">
+      <rect width="330" height="300" rx="28" fill="#F8F8F6" stroke="#D9D6CF" stroke-width="3"/>
+      <text x="40" y="90" fill="#1D1D1B" font-size="36" font-weight="700">QR Access</text>
+      <rect x="55" y="125" width="120" height="120" rx="12" fill="#FFFFFF" stroke="#1D1D1B" stroke-width="4"/>
+      <rect x="78" y="148" width="28" height="28" fill="#1D1D1B"/>
+      <rect x="125" y="148" width="28" height="28" fill="#1D1D1B"/>
+      <rect x="78" y="195" width="28" height="28" fill="#1D1D1B"/>
+      <text x="40" y="282" fill="#77746E" font-size="25">扫码继续查询</text>
+    </g>
+  </g>
+  <path d="M505 580H555" stroke="#F5C83B" stroke-width="10" stroke-linecap="round"/>
+  <path d="M555 580L530 555M555 580L530 605" stroke="#F5C83B" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M945 580H995" stroke="#F5C83B" stroke-width="10" stroke-linecap="round"/>
+  <path d="M995 580L970 555M995 580L970 605" stroke="#F5C83B" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M1385 580H1435" stroke="#F5C83B" stroke-width="10" stroke-linecap="round"/>
+  <path d="M1435 580L1410 555M1435 580L1410 605" stroke="#F5C83B" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M1825 580H1875" stroke="#F5C83B" stroke-width="10" stroke-linecap="round"/>
+  <path d="M1875 580L1850 555M1875 580L1850 605" stroke="#F5C83B" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="150" y="915" width="2100" height="170" rx="28" fill="#F8F8F6" stroke="#D9D6CF" stroke-width="3"/>
+  <text x="200" y="990" fill="#1D1D1B" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="700">A continuous campus navigation service</text>
+  <text x="200" y="1045" fill="#77746E" font-family="Arial, Helvetica, sans-serif" font-size="27">线下标识解决即时方向判断，线上页面解决楼层与房间查询，二维码成为二者之间的轻量入口。</text>
+</svg>
