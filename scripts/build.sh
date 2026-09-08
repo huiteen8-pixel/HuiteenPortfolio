@@ -9,9 +9,12 @@ echo "Installing dependencies..."
 pnpm install --prefer-frozen-lockfile --prefer-offline --loglevel debug --reporter=append-only
 
 echo "Building the Next.js project..."
-pnpm next build
+# Turbopack currently panics when this project lives in a Windows path that
+# contains non-ASCII characters. Webpack produces the same production output
+# without that upstream path-decoding failure.
+pnpm next build --webpack
 
-echo "Bundling server with tsup..."
-pnpm tsup src/server.ts --format cjs --platform node --target node20 --outDir dist --no-splitting --no-minify
+echo "Preparing the standalone runtime..."
+node scripts/prepare-standalone.mjs
 
 echo "Build completed successfully!"

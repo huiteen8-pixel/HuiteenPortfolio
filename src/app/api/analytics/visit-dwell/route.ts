@@ -1,12 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db';
+import { analyticsJson, isAnalyticsAdmin, unauthorizedAnalyticsResponse } from '@/lib/analytics-auth';
+import { analyticsPayloadError, isValidUuid } from '@/lib/analytics-api';
 
 // GET /api/analytics/visit-dwell?visit_id=xxx — get module dwell times for a single visit
 export async function GET(req: NextRequest) {
+  if (!isAnalyticsAdmin(req)) return unauthorizedAnalyticsResponse();
+
   try {
     const visitId = req.nextUrl.searchParams.get('visit_id');
-    if (!visitId) {
-      return NextResponse.json({ error: 'visit_id is required' }, { status: 400 });
+    if (!isValidUuid(visitId)) {
+      return analyticsJson({ error: 'valid visit_id is required' }, { status: 400 });
     }
 
     const db = getDb();
@@ -25,15 +29,14 @@ export async function GET(req: NextRequest) {
 
     const totalDwell = (records || []).reduce((sum, r) => sum + r.dwell_time_ms, 0);
 
-    return NextResponse.json({
+    return analyticsJson({
       modules: records || [],
       total_dwell_ms: totalDwell,
       viewed_resume: visit?.viewed_resume === 1,
       resume_dwell_ms: visit?.resume_dwell_ms ?? 0,
       downloaded_resume: visit?.downloaded_resume === 1,
     });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (error: unknown) {
+    return analyticsPayloadError(error);
   }
 }

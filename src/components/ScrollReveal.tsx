@@ -2,6 +2,7 @@
 
 import { motion, useInView, Variants } from 'framer-motion';
 import { useRef, ReactNode } from 'react';
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -17,12 +18,10 @@ const variants: Variants = {
   hidden: (custom: { y: number }) => ({
     opacity: 0,
     y: custom.y,
-    filter: 'blur(8px)',
   }),
   visible: (custom: { duration: number; delay: number }) => ({
     opacity: 1,
     y: 0,
-    filter: 'blur(0px)',
     transition: {
       duration: custom.duration,
       delay: custom.delay,
@@ -35,12 +34,21 @@ export default function ScrollReveal({
   children,
   className = '',
   delay = 0,
-  duration = 0.8,
-  y = 40,
+  duration = 0.62,
+  y = 22,
   once = true,
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once, margin: '-80px' });
+  const shouldReduceMotion = usePrefersReducedMotion();
+
+  if (shouldReduceMotion) {
+    return (
+      <div ref={ref} className={className}>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -50,6 +58,8 @@ export default function ScrollReveal({
       animate={isInView ? 'visible' : 'hidden'}
       variants={variants}
       className={className}
+      data-motion-reveal
+      style={{ willChange: isInView ? 'auto' : 'transform, opacity' }}
     >
       {children}
     </motion.div>
@@ -68,7 +78,16 @@ export function WordReveal({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-80px' });
+  const shouldReduceMotion = usePrefersReducedMotion();
   const words = text.split(' ');
+
+  if (shouldReduceMotion) {
+    return (
+      <div ref={ref} className={className}>
+        {text}
+      </div>
+    );
+  }
 
   return (
     <div ref={ref} className={className}>
@@ -79,8 +98,8 @@ export function WordReveal({
             initial={{ y: '100%', opacity: 0 }}
             animate={isInView ? { y: 0, opacity: 1 } : { y: '100%', opacity: 0 }}
             transition={{
-              duration: 0.6,
-              delay: delay + i * 0.04,
+              duration: 0.5,
+              delay: delay + i * 0.035,
               ease: [0.22, 1, 0.36, 1],
             }}
           >
@@ -102,6 +121,15 @@ export function DrawLine({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-40px' });
+  const shouldReduceMotion = usePrefersReducedMotion();
+
+  if (shouldReduceMotion) {
+    return (
+      <div ref={ref} className={className}>
+        <div className="h-px bg-[#e0e0e0]" />
+      </div>
+    );
+  }
 
   return (
     <div ref={ref} className={`overflow-hidden ${className}`}>
@@ -110,7 +138,7 @@ export function DrawLine({
         initial={{ scaleX: 0 }}
         animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
         transition={{
-          duration: 1.2,
+          duration: 0.8,
           delay,
           ease: [0.22, 1, 0.36, 1],
         }}

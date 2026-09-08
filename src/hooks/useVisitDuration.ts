@@ -2,14 +2,14 @@
 
 import { useEffect, useRef } from 'react';
 
-export function useVisitDuration(visitId: string | null) {
+export function useVisitDuration(visitId: string | null, visitToken: string | null) {
   const totalVisibleTime = useRef<number>(0);
   const lastVisibleStart = useRef<number | null>(null);
   const completionSent = useRef(false);
   const reportInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!visitId) return;
+    if (!visitId || !visitToken) return;
 
     const startTimer = () => {
       if (!lastVisibleStart.current) {
@@ -38,7 +38,7 @@ export function useVisitDuration(visitId: string | null) {
     };
 
     const postJson = (url: string, payload: Record<string, unknown>, useBeacon: boolean) => {
-      const body = JSON.stringify(payload);
+      const body = JSON.stringify({ ...payload, token: visitToken });
 
       if (useBeacon && navigator.sendBeacon(url, body)) {
         return;
@@ -109,5 +109,5 @@ export function useVisitDuration(visitId: string | null) {
 
       reportDuration(true);
     };
-  }, [visitId]);
+  }, [visitId, visitToken]);
 }

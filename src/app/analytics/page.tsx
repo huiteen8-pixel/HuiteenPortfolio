@@ -1,6 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, type RefObject } from 'react';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 /* ── Pie Chart Component ── */
 function PieChart({ data, size = 200 }: { data: { label: string; value: number; color: string }[]; size?: number }) {
@@ -11,14 +19,13 @@ function PieChart({ data, size = 200 }: { data: { label: string; value: number; 
   const centerX = size / 2;
   const centerY = size / 2;
 
-  let currentAngle = -90; // 从顶部开始
-
   const slices = data.map((d, i) => {
     const percentage = d.value / total;
     const angle = percentage * 360;
-    const startAngle = currentAngle;
-    const endAngle = currentAngle + angle;
-    currentAngle = endAngle;
+    const startAngle = -90 + data
+      .slice(0, i)
+      .reduce((sum, item) => sum + (item.value / total) * 360, 0);
+    const endAngle = startAngle + angle;
 
     const startRad = (startAngle * Math.PI) / 180;
     const endRad = (endAngle * Math.PI) / 180;
@@ -105,8 +112,6 @@ interface AnalyticsStats {
   top_modules: { module_name: string; total_dwell_ms: number }[];
   devices: Record<string, number>;
   browsers: Record<string, number>;
-  resume_viewed: number;
-  resume_downloaded: number;
   click_events: { event_label: string; count: number }[];
 }
 
@@ -127,10 +132,6 @@ interface EmailSettings {
   smtp_from: string;
   password_set: boolean;
 }
-
-/* ── Password ── */
-const CORRECT_PASSWORD = 'ooooyasumi';
-const AUTH_KEY = 'dashboard_auth';
 
 /* ── Helpers ── */
 const formatMs = (ms: number) => {
@@ -172,62 +173,98 @@ const parseBrowser = (ua: string) => {
 
 const MODULE_LABELS: Record<string, string> = {
   about: 'Hero / 关于',
-  introduce: '个人介绍',
-  education: '教育背景',
-  workexperience: '工作经历',
-  technical: '技术项目',
-  skills: '技能',
-  connect: '联系方式',
+  profile: '个人介绍 / 教育',
+  skills: '方法与能力',
+  projects: '项目',
+  connect: 'Approach',
 };
 
 const MODULE_COLORS: Record<string, string> = {
   about: '#6366f1',
-  introduce: '#8b5cf6',
-  education: '#a78bfa',
-  workexperience: '#c084fc',
-  technical: '#e879f9',
-  skills: '#f472b6',
+  profile: '#8b5cf6',
+  skills: '#c084fc',
+  projects: '#f472b6',
   connect: '#fb7185',
 };
 
 const getModuleColor = (name: string) => MODULE_COLORS[name] || '#94a3b8';
 
 const CLICK_EVENT_LABELS: Record<string, string> = {
-  blog: '个人博客',
-  github: 'GitHub',
-  xhs: '小红书',
-  x: 'X',
-  bilibili: '哔哩哔哩',
+  'gafa-1': 'GAFA 1.0 在线导览',
+  'gafa-2': 'GAFA 2.0 楼层导览',
+  'emotional-lens': 'Emotional Lens 在线概念网页',
 };
 
 /* ── Password Gate Component ── */
 function PasswordGate({ children }: { children: React.ReactNode }) {
-  const [authenticated, setAuthenticated] = useState(false);
+  const [status, setStatus] = useState<'checking' | 'authenticated' | 'unauthenticated' | 'unconfigured'>('checking');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
-  const [checking, setChecking] = useState(true);
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem(AUTH_KEY) === '1') {
-      setAuthenticated(true);
-    }
-    setChecking(false);
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/analytics/auth', { cache: 'no-store' });
+        const data = await response.json();
+        if (!data.configured) {
+          setStatus('unconfigured');
+        } else {
+          setStatus(data.authenticated ? 'authenticated' : 'unauthenticated');
+        }
+      } catch {
+        setError('无法验证登录状态，请稍后重试');
+        setStatus('unauthenticated');
+      }
+    };
+    checkSession();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === CORRECT_PASSWORD) {
-      sessionStorage.setItem(AUTH_KEY, '1');
-      setAuthenticated(true);
-      setError(false);
-    } else {
-      setError(true);
+    if (!password || submitting) return;
+
+    setSubmitting(true);
+    setError('');
+    try {
+      const response = await fetch('/api/analytics/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      if (!response.ok) {
+        setError(response.status === 429 ? '尝试次数过多，请稍后重试' : '密码错误，请重试');
+        return;
+      }
+      setPassword('');
+      setStatus('authenticated');
+    } catch {
+      setError('登录请求失败，请稍后重试');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  if (checking) return null;
+  if (status === 'checking') {
+    return <div className="min-h-screen bg-stone-50 dark:bg-stone-900" aria-busy="true" />;
+  }
 
-  if (!authenticated) {
+  if (status === 'unconfigured') {
+    return (
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-900 flex items-center justify-center px-6">
+        <div className="max-w-md text-center">
+          <h1 className="text-xl font-semibold text-stone-800 dark:text-stone-200">数据分析后台未配置</h1>
+          <p className="mt-3 text-sm leading-6 text-stone-500">
+            请检查服务器环境变量：生产环境需要至少 16 个字符的
+            {' '}ANALYTICS_ADMIN_PASSWORD，以及独立、至少 32 个随机字符的
+            {' '}ANALYTICS_SESSION_SECRET。配置后请重启服务。
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status !== 'authenticated') {
     return (
       <div className="min-h-screen bg-stone-50 dark:bg-stone-900 flex items-center justify-center">
         <form onSubmit={handleSubmit} className="w-full max-w-sm px-6">
@@ -243,19 +280,20 @@ function PasswordGate({ children }: { children: React.ReactNode }) {
           <input
             type="password"
             value={password}
-            onChange={e => { setPassword(e.target.value); setError(false); }}
+            onChange={e => { setPassword(e.target.value); setError(''); }}
             placeholder="密码"
             autoFocus
             className="w-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg px-4 py-3 text-sm text-stone-800 dark:text-stone-200 placeholder-stone-300 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:border-transparent text-center tracking-widest"
           />
           {error && (
-            <p className="text-red-500 text-xs text-center mt-2">密码错误，请重试</p>
+            <p role="alert" className="text-red-500 text-xs text-center mt-2">{error}</p>
           )}
           <button
             type="submit"
-            className="w-full mt-4 py-3 bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:hover:bg-stone-200 dark:text-stone-900 text-white text-sm font-medium rounded-lg transition-colors"
+            disabled={submitting || !password}
+            className="w-full mt-4 py-3 bg-stone-900 hover:bg-stone-800 disabled:opacity-50 dark:bg-stone-100 dark:hover:bg-stone-200 dark:text-stone-900 text-white text-sm font-medium rounded-lg transition-colors"
           >
-            进入
+            {submitting ? '验证中…' : '进入'}
           </button>
         </form>
       </div>
@@ -428,7 +466,7 @@ function StatsPanel({ linkId }: { linkId: string }) {
           <p className="text-2xl font-semibold text-stone-800 dark:text-stone-200 mt-1">{stats.total_visits}</p>
         </div>
         <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl p-4">
-          <p className="text-xs text-stone-400">独立访客</p>
+          <p className="text-xs text-stone-400">匿名网络段</p>
           <p className="text-2xl font-semibold text-stone-800 dark:text-stone-200 mt-1">{stats.unique_visitors}</p>
         </div>
         <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl p-4">
@@ -489,38 +527,23 @@ function StatsPanel({ linkId }: { linkId: string }) {
         )}
       </div>
 
-      {/* Resume & Click Events */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl p-5">
-          <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-4">简历互动</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-stone-600 dark:text-stone-400">查看简历</span>
-              <span className="text-sm font-mono text-stone-500">{stats.resume_viewed}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-stone-600 dark:text-stone-400">下载简历</span>
-              <span className="text-sm font-mono text-stone-500">{stats.resume_downloaded}</span>
-            </div>
+      {/* Click Events */}
+      <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl p-5">
+        <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-4">链接点击</h3>
+        {stats.click_events.length === 0 ? (
+          <p className="text-stone-400 text-sm">暂无数据</p>
+        ) : (
+          <div className="space-y-2">
+            {stats.click_events.map(ev => (
+              <div key={ev.event_label} className="flex items-center justify-between">
+                <span className="text-sm text-stone-600 dark:text-stone-400">
+                  {CLICK_EVENT_LABELS[ev.event_label] || ev.event_label}
+                </span>
+                <span className="text-sm font-mono text-stone-500">{ev.count}</span>
+              </div>
+            ))}
           </div>
-        </div>
-        <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl p-5">
-          <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-4">链接点击</h3>
-          {stats.click_events.length === 0 ? (
-            <p className="text-stone-400 text-sm">暂无数据</p>
-          ) : (
-            <div className="space-y-2">
-              {stats.click_events.map(ev => (
-                <div key={ev.event_label} className="flex items-center justify-between">
-                  <span className="text-sm text-stone-600 dark:text-stone-400">
-                    {CLICK_EVENT_LABELS[ev.event_label] || ev.event_label}
-                  </span>
-                  <span className="text-sm font-mono text-stone-500">{ev.count}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Device & Browser */}
@@ -579,7 +602,8 @@ function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="p-2 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+      aria-label={dark ? '切换到亮色模式' : '切换到暗色模式'}
+      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
       title={dark ? '切换到亮色模式' : '切换到暗色模式'}
     >
       {dark ? (
@@ -595,7 +619,15 @@ function ThemeToggle() {
   );
 }
 
-function EmailSettingsPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+function EmailSettingsPanel({
+  open,
+  onClose,
+  restoreFocusRef,
+}: {
+  open: boolean;
+  onClose: () => void;
+  restoreFocusRef: RefObject<HTMLButtonElement | null>;
+}) {
   const [settings, setSettings] = useState<EmailSettings | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -608,9 +640,7 @@ function EmailSettingsPanel({ open, onClose }: { open: boolean; onClose: () => v
       setLoading(true);
       setMessage('');
       try {
-        const res = await fetch('/api/analytics/email-settings', {
-          headers: { 'x-analytics-admin-password': CORRECT_PASSWORD },
-        });
+        const res = await fetch('/api/analytics/email-settings', { cache: 'no-store' });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
         setSettings(data);
@@ -624,8 +654,6 @@ function EmailSettingsPanel({ open, onClose }: { open: boolean; onClose: () => v
     fetchSettings();
   }, [open]);
 
-  if (!open) return null;
-
   const update = <K extends keyof EmailSettings>(key: K, value: EmailSettings[K]) => {
     setSettings((prev) => prev ? { ...prev, [key]: value } : prev);
   };
@@ -638,10 +666,7 @@ function EmailSettingsPanel({ open, onClose }: { open: boolean; onClose: () => v
     try {
       const res = await fetch('/api/analytics/email-settings', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-analytics-admin-password': CORRECT_PASSWORD,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
       });
       const data = await res.json();
@@ -656,22 +681,35 @@ function EmailSettingsPanel({ open, onClose }: { open: boolean; onClose: () => v
   };
 
   return (
-    <div className="fixed inset-0 z-[80] bg-black/30 backdrop-blur-sm flex items-center justify-center px-4">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl shadow-xl">
-        <div className="px-6 py-4 border-b border-stone-200 dark:border-stone-700 flex items-center justify-between">
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+      <DialogContent
+        showCloseButton={false}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          setTimeout(() => restoreFocusRef.current?.focus(), 0);
+        }}
+        className="z-[80] block max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl overflow-hidden border-stone-200 bg-white p-0 text-stone-900 shadow-xl dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+      >
+        <DialogHeader className="flex-row items-center justify-between gap-4 border-b border-stone-200 px-4 py-4 text-left dark:border-stone-700 sm:px-6">
           <div>
-            <h2 className="text-base font-semibold text-stone-800 dark:text-stone-100">邮件设置</h2>
-            <p className="text-xs text-stone-400 mt-1">访问完成后发送浏览总结邮件</p>
+            <DialogTitle className="text-base font-semibold text-stone-800 dark:text-stone-100">
+              邮件设置
+            </DialogTitle>
+            <DialogDescription className="mt-1 text-xs text-stone-400">
+              访问完成后发送浏览总结邮件
+            </DialogDescription>
           </div>
-          <button
-            onClick={onClose}
-            className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 text-sm"
-          >
-            关闭
-          </button>
-        </div>
+          <DialogClose asChild>
+            <button
+              type="button"
+              className="min-h-11 shrink-0 rounded-md px-3 text-sm text-stone-400 transition-colors hover:text-stone-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-500 dark:hover:text-stone-200"
+            >
+              关闭
+            </button>
+          </DialogClose>
+        </DialogHeader>
 
-        <div className="p-6">
+        <div className="max-h-[calc(90dvh-77px)] overflow-y-auto p-4 sm:p-6">
           {loading || !settings ? (
             <p className="text-sm text-stone-400">加载中...</p>
           ) : (
@@ -700,7 +738,7 @@ function EmailSettingsPanel({ open, onClose }: { open: boolean; onClose: () => v
                   label="站点地址"
                   value={settings.public_base_url}
                   onChange={(value) => update('public_base_url', value)}
-                  placeholder="https://ooooyasumi.com"
+                  placeholder="https://your-domain.example"
                 />
                 <SettingsInput
                   label="SMTP Host"
@@ -721,18 +759,15 @@ function EmailSettingsPanel({ open, onClose }: { open: boolean; onClose: () => v
                   onChange={(value) => update('smtp_user', value)}
                   placeholder="sender@example.com"
                 />
-                <SettingsInput
-                  label={settings.password_set ? 'SMTP Password（已设置，留空不改）' : 'SMTP Password'}
-                  value={settings.smtp_pass}
-                  onChange={(value) => update('smtp_pass', value)}
-                  placeholder={settings.password_set ? '留空则保留原密码' : '授权码或密码'}
-                  type="password"
-                />
+                <div className="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs leading-5 text-stone-500 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-400">
+                  SMTP 密码仅从服务器环境变量 SMTP_PASS 读取，不会保存到分析数据库。
+                  <span className="block mt-1">{settings.password_set ? '当前已配置' : '当前未配置'}</span>
+                </div>
                 <SettingsInput
                   label="发件人"
                   value={settings.smtp_from}
                   onChange={(value) => update('smtp_from', value)}
-                  placeholder="RenRui Resume <sender@example.com>"
+                  placeholder="Huiteen Portfolio <sender@example.com>"
                 />
                 <label className="flex items-center gap-3 pt-6 text-sm text-stone-600 dark:text-stone-300">
                   <input
@@ -746,13 +781,17 @@ function EmailSettingsPanel({ open, onClose }: { open: boolean; onClose: () => v
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <p className={`text-sm ${message === '已保存' ? 'text-emerald-600' : 'text-red-500'}`}>
+                <p
+                  aria-live="polite"
+                  className={`text-sm ${message === '已保存' ? 'text-emerald-600' : 'text-red-500'}`}
+                >
                   {message}
                 </p>
                 <button
+                  type="button"
                   onClick={save}
                   disabled={saving}
-                  className="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 disabled:bg-stone-300 text-white text-sm font-medium rounded-lg transition-colors"
+                  className="min-h-11 px-5 py-2.5 bg-stone-900 hover:bg-stone-800 disabled:bg-stone-300 text-white text-sm font-medium rounded-lg transition-colors"
                 >
                   {saving ? '保存中...' : '保存设置'}
                 </button>
@@ -760,8 +799,8 @@ function EmailSettingsPanel({ open, onClose }: { open: boolean; onClose: () => v
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -793,7 +832,7 @@ function SettingsInput({
 }
 
 /* ── Main Dashboard ── */
-export default function AnalyticsPage() {
+function AnalyticsDashboard() {
   const [targetLinkId, setTargetLinkId] = useState<string | null>(null);
   const [links, setLinks] = useState<ShareLink[]>([]);
   const [loading, setLoading] = useState(true);
@@ -805,6 +844,7 @@ export default function AnalyticsPage() {
   const [visitsLoading, setVisitsLoading] = useState(false);
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
   const [showEmailSettings, setShowEmailSettings] = useState(false);
+  const emailSettingsTriggerRef = useRef<HTMLButtonElement>(null);
 
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [activeTab, setActiveTab] = useState<'visits' | 'stats'>('stats');
@@ -898,47 +938,60 @@ export default function AnalyticsPage() {
   };
 
   const totalClicks = links.reduce((sum, l) => sum + l.click_count, 0);
-  const uniqueIps = new Set(visits.map(v => v.ip)).size;
+  const uniqueIps = new Set(visits.map(v => v.ip).filter(Boolean)).size;
+
+  const logout = async () => {
+    await fetch('/api/analytics/auth', { method: 'DELETE' });
+    window.location.reload();
+  };
 
   return (
-    <PasswordGate>
       <div className="min-h-screen bg-stone-50 dark:bg-stone-900 transition-colors">
         {/* Header */}
         <header className="border-b border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800">
-          <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-semibold text-stone-800 dark:text-stone-200">数据分析</h1>
-              <p className="text-xs text-stone-400 mt-0.5">简历访问追踪与模块停留分析</p>
-            </div>
-            <div className="flex items-center gap-5">
-              <div className="flex items-center gap-5 text-center">
-                <div>
-                  <p className="text-xl font-semibold text-stone-800 dark:text-stone-200">{links.length}</p>
-                  <p className="text-[10px] text-stone-400 uppercase tracking-wider">链接</p>
+          <div className="max-w-6xl mx-auto px-4 py-4 sm:px-6 sm:py-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="min-w-0">
+                <h1 className="text-lg font-semibold text-stone-800 dark:text-stone-200">数据分析</h1>
+                <p className="text-xs text-stone-400 mt-0.5">作品集访问追踪与模块停留分析</p>
+              </div>
+              <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto lg:gap-5">
+                <div className="grid w-full grid-cols-3 divide-x divide-stone-200 rounded-xl border border-stone-200 text-center dark:divide-stone-700 dark:border-stone-700 sm:min-w-[300px] sm:flex-1 lg:w-auto lg:flex-none">
+                  <div className="px-2 py-2.5">
+                    <p className="text-xl font-semibold text-stone-800 dark:text-stone-200">{links.length}</p>
+                    <p className="text-[10px] text-stone-400 uppercase tracking-wider">链接</p>
+                  </div>
+                  <div className="px-2 py-2.5">
+                    <p className="text-xl font-semibold text-stone-800 dark:text-stone-200">{totalClicks}</p>
+                    <p className="text-[10px] text-stone-400 uppercase tracking-wider">点击</p>
+                  </div>
+                  <div className="px-2 py-2.5">
+                    <p className="text-xl font-semibold text-stone-800 dark:text-stone-200">{selectedLink ? uniqueIps : '—'}</p>
+                    <p className="text-[10px] text-stone-400 uppercase tracking-wider">匿名网络段</p>
+                  </div>
                 </div>
-                <div className="w-px h-8 bg-stone-200 dark:bg-stone-700" />
-                <div>
-                  <p className="text-xl font-semibold text-stone-800 dark:text-stone-200">{totalClicks}</p>
-                  <p className="text-[10px] text-stone-400 uppercase tracking-wider">点击</p>
-                </div>
-                <div className="w-px h-8 bg-stone-200 dark:bg-stone-700" />
-                <div>
-                  <p className="text-xl font-semibold text-stone-800 dark:text-stone-200">{selectedLink ? uniqueIps : '—'}</p>
-                  <p className="text-[10px] text-stone-400 uppercase tracking-wider">独立访客</p>
+                <div className="grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:flex sm:w-auto">
+                  <button
+                    ref={emailSettingsTriggerRef}
+                    onClick={() => setShowEmailSettings(true)}
+                    className="min-h-11 whitespace-nowrap px-3 py-2 text-xs rounded-lg border border-stone-200 dark:border-stone-700 text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+                  >
+                    邮件设置
+                  </button>
+                  <button
+                    onClick={logout}
+                    className="min-h-11 whitespace-nowrap px-3 py-2 text-xs rounded-lg text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
+                  >
+                    退出
+                  </button>
+                  <ThemeToggle />
                 </div>
               </div>
-              <button
-                onClick={() => setShowEmailSettings(true)}
-                className="px-3 py-2 text-xs rounded-lg border border-stone-200 dark:border-stone-700 text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
-              >
-                邮件设置
-              </button>
-              <ThemeToggle />
             </div>
           </div>
         </header>
 
-        <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6">
           {/* Create link */}
           <div className="mb-8">
             <div className="flex gap-3 max-w-lg">
@@ -948,12 +1001,12 @@ export default function AnalyticsPage() {
                 onChange={e => setNewLinkName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && createLink()}
                 placeholder="新建分享链接，输入名称如：腾讯内推"
-                className="flex-1 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg px-4 py-2.5 text-sm text-stone-800 dark:text-stone-200 placeholder-stone-300 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-300 dark:focus:ring-stone-600 focus:border-transparent"
+                className="min-w-0 flex-1 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg px-4 py-2.5 text-sm text-stone-800 dark:text-stone-200 placeholder-stone-300 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-300 dark:focus:ring-stone-600 focus:border-transparent"
               />
               <button
                 onClick={createLink}
                 disabled={creating || !newLinkName.trim()}
-                className="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:hover:bg-stone-200 dark:text-stone-900 disabled:bg-stone-300 dark:disabled:bg-stone-600 disabled:text-stone-500 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+                className="min-h-11 px-5 py-2.5 bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:hover:bg-stone-200 dark:text-stone-900 disabled:bg-stone-300 dark:disabled:bg-stone-600 disabled:text-stone-500 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
               >
                 {creating ? '...' : '创建'}
               </button>
@@ -973,24 +1026,32 @@ export default function AnalyticsPage() {
                   {links.map(link => (
                     <div
                       key={link.id}
-                      onClick={() => fetchVisits(link)}
-                      className={`cursor-pointer bg-white dark:bg-stone-800 border rounded-lg p-4 transition-all ${
+                      className={`bg-white dark:bg-stone-800 border rounded-lg p-4 transition-all ${
                         selectedLink?.id === link.id
                           ? 'border-stone-400 dark:border-stone-500 ring-1 ring-stone-200 dark:ring-stone-600'
                           : 'border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-medium text-sm text-stone-800 dark:text-stone-200 truncate">{link.name}</h3>
                         <button
-                          onClick={e => { e.stopPropagation(); deleteLink(link.id); }}
-                          className="text-stone-300 hover:text-red-400 transition-colors text-xs"
+                          type="button"
+                          onClick={() => fetchVisits(link)}
+                          aria-pressed={selectedLink?.id === link.id}
+                          className="min-h-11 min-w-0 flex-1 rounded-md pr-3 text-left font-medium text-sm text-stone-800 dark:text-stone-200 truncate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-500"
+                        >
+                          {link.name}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteLink(link.id)}
+                          aria-label={`删除分享链接：${link.name}`}
+                          className="min-h-11 rounded-md px-3 text-stone-400 hover:text-red-500 transition-colors text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
                         >
                           删除
                         </button>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <code className="text-[11px] text-stone-400 bg-stone-50 dark:bg-stone-700 px-2 py-0.5 rounded font-mono">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <code className="max-w-full break-all text-[11px] text-stone-400 bg-stone-50 dark:bg-stone-700 px-2 py-1 rounded font-mono">
                           ?ref={link.slug}
                         </code>
                         <div className="flex items-center gap-3">
@@ -998,8 +1059,10 @@ export default function AnalyticsPage() {
                             {link.click_count} 次点击
                           </span>
                           <button
-                            onClick={e => { e.stopPropagation(); copyShareUrl(link.slug); }}
-                            className="text-xs text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 transition-colors"
+                            type="button"
+                            onClick={() => copyShareUrl(link.slug)}
+                            aria-label={`复制分享链接：${link.name}`}
+                            className="min-h-11 rounded-md px-3 text-xs text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-500"
                           >
                             {copiedSlug === link.slug ? '✓' : '复制'}
                           </button>
@@ -1061,8 +1124,8 @@ export default function AnalyticsPage() {
                   ) : visits.length === 0 ? (
                     <p className="text-stone-400 text-sm">暂无访问记录</p>
                   ) : (
-                    <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
-                      <table className="w-full text-sm">
+                    <div className="overflow-x-auto rounded-xl border border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800">
+                      <table className="min-w-[720px] w-full text-sm">
                         <thead>
                           <tr className="text-stone-400 text-xs text-left border-b border-stone-100 dark:border-stone-700">
                             <th className="px-4 py-3 font-medium">时间</th>
@@ -1077,8 +1140,7 @@ export default function AnalyticsPage() {
                           {visits.map(visit => (
                             <tr
                               key={visit.id}
-                              className="border-b border-stone-50 dark:border-stone-700 hover:bg-stone-50/50 dark:hover:bg-stone-700/50 cursor-pointer transition-colors"
-                              onClick={() => setSelectedVisit(visit)}
+                              className="border-b border-stone-50 dark:border-stone-700 hover:bg-stone-50/50 dark:hover:bg-stone-700/50 transition-colors"
                             >
                               <td className="px-4 py-3 text-stone-500 whitespace-nowrap text-xs">
                                 {new Date(visit.visited_at).toLocaleString('zh-CN', {
@@ -1099,9 +1161,14 @@ export default function AnalyticsPage() {
                                 {visit.duration_ms > 0 ? formatDuration(visit.duration_ms) : '—'}
                               </td>
                               <td className="px-4 py-3">
-                                <span className="text-stone-300 hover:text-stone-600 dark:hover:text-stone-300 text-xs transition-colors">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedVisit(visit)}
+                                  aria-label={`查看 ${new Date(visit.visited_at).toLocaleString('zh-CN')} 的访问详情`}
+                                  className="min-h-11 whitespace-nowrap rounded-md px-3 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-500"
+                                >
                                   详情 →
-                                </span>
+                                </button>
                               </td>
                             </tr>
                           ))}
@@ -1114,8 +1181,19 @@ export default function AnalyticsPage() {
             </div>
           </div>
         </div>
-        <EmailSettingsPanel open={showEmailSettings} onClose={() => setShowEmailSettings(false)} />
+        <EmailSettingsPanel
+          open={showEmailSettings}
+          onClose={() => setShowEmailSettings(false)}
+          restoreFocusRef={emailSettingsTriggerRef}
+        />
       </div>
+  );
+}
+
+export default function AnalyticsPage() {
+  return (
+    <PasswordGate>
+      <AnalyticsDashboard />
     </PasswordGate>
   );
 }

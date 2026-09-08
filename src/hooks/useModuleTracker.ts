@@ -4,12 +4,10 @@ import { useEffect, useRef } from 'react';
 
 const DEFAULT_MODULE_SELECTORS = [
   { id: 'about', label: 'Hero / 关于' },
-  { id: 'introduce', label: '个人介绍' },
-  { id: 'education', label: '教育背景' },
-  { id: 'workexperience', label: '工作经历' },
-  { id: 'technical', label: '技术项目' },
-  { id: 'skills', label: '技能' },
-  { id: 'connect', label: '联系方式' },
+  { id: 'profile', label: '个人介绍 / 教育' },
+  { id: 'skills', label: '方法与能力' },
+  { id: 'projects', label: '项目' },
+  { id: 'connect', label: 'Approach' },
 ];
 
 interface DwellRecord {
@@ -17,33 +15,19 @@ interface DwellRecord {
   dwell_time_ms: number;
 }
 
-export function useModuleTracker(modules = DEFAULT_MODULE_SELECTORS) {
+export function useModuleTracker(
+  visitId: string | null,
+  visitToken: string | null,
+  modules = DEFAULT_MODULE_SELECTORS,
+) {
   const dwellTimers = useRef<Record<string, number>>({});
   const lastVisible = useRef<Record<string, number>>({});
   const visibleModules = useRef<Set<string>>(new Set());
-  const visitId = useRef<string | null>(null);
   const finalReported = useRef(false);
 
   useEffect(() => {
-    const checkVisitId = () => {
-      const stored = sessionStorage.getItem('visit_id');
-      if (stored) {
-        visitId.current = stored;
-      }
-    };
+    if (!visitId || !visitToken) return;
 
-    checkVisitId();
-    const poll = setInterval(() => {
-      checkVisitId();
-      if (visitId.current) {
-        clearInterval(poll);
-      }
-    }, 500);
-
-    return () => clearInterval(poll);
-  }, []);
-
-  useEffect(() => {
     const observers: IntersectionObserver[] = [];
 
     const addElapsed = (id: string, now: number) => {
@@ -106,13 +90,12 @@ export function useModuleTracker(modules = DEFAULT_MODULE_SELECTORS) {
     };
 
     const sendRecords = (keepRunning: boolean, useBeacon: boolean) => {
-      if (!visitId.current) return;
-
       const records = buildRecords(keepRunning);
       if (records.length === 0) return;
 
       const payload = JSON.stringify({
-        visit_id: visitId.current,
+        visit_id: visitId,
+        token: visitToken,
         records,
       });
 
@@ -195,5 +178,5 @@ export function useModuleTracker(modules = DEFAULT_MODULE_SELECTORS) {
       clearInterval(autoReportInterval);
       flushFinal();
     };
-  }, [modules]);
+  }, [modules, visitId, visitToken]);
 }

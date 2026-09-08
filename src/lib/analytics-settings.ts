@@ -21,22 +21,22 @@ type EmailSettingsRow = {
   smtp_port: number | null;
   smtp_secure: number;
   smtp_user: string | null;
-  smtp_pass: string | null;
   smtp_from: string | null;
 };
 
-export type EmailSettingsInput = Omit<EmailSettings, 'password_set'>;
+export type EmailSettingsInput = Omit<EmailSettings, 'password_set' | 'smtp_pass'>;
 
 export function getEmailSettings(db: Database.Database, includeSecret = false): EmailSettings {
   const row = db.prepare(`
     SELECT enabled, recipient_email, public_base_url, smtp_host, smtp_port,
-           smtp_secure, smtp_user, smtp_pass, smtp_from
+           smtp_secure, smtp_user, smtp_from
     FROM analytics_email_settings
     WHERE id = 'default'
   `).get() as EmailSettingsRow | undefined;
 
-  const envPass = process.env.SMTP_PASS || '';
-  const smtpPass = row?.smtp_pass || envPass;
+  // SMTP credentials are deliberately environment-only. Persisting them in the same
+  // analytics database made an accidental database commit a credential disclosure.
+  const smtpPass = process.env.SMTP_PASS || '';
 
   return {
     enabled: row ? row.enabled === 1 : process.env.ANALYTICS_SUMMARY_EMAIL_ENABLED === 'true',
@@ -53,8 +53,6 @@ export function getEmailSettings(db: Database.Database, includeSecret = false): 
 }
 
 export function saveEmailSettings(db: Database.Database, input: EmailSettingsInput) {
-  const current = getEmailSettings(db, true);
-  const smtpPass = input.smtp_pass.trim() ? input.smtp_pass.trim() : current.smtp_pass;
   const now = new Date().toISOString();
 
   db.prepare(`
@@ -71,7 +69,7 @@ export function saveEmailSettings(db: Database.Database, input: EmailSettingsInp
       smtp_port = excluded.smtp_port,
       smtp_secure = excluded.smtp_secure,
       smtp_user = excluded.smtp_user,
-      smtp_pass = excluded.smtp_pass,
+      smtp_pass = NULL,
       smtp_from = excluded.smtp_from,
       updated_at = excluded.updated_at
   `).run(
@@ -82,7 +80,7 @@ export function saveEmailSettings(db: Database.Database, input: EmailSettingsInp
     Number(input.smtp_port || 465),
     input.smtp_secure ? 1 : 0,
     input.smtp_user.trim(),
-    smtpPass,
+    null,
     input.smtp_from.trim(),
     now
   );

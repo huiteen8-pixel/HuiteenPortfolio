@@ -10,12 +10,58 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const sqlitePath = process.env.SQLITE_DB_PATH || join(process.cwd(), 'data', 'analytics.db');
 
+type ShareLinkRow = {
+  id: string;
+  name: string;
+  slug: string;
+  click_count?: number | null;
+  is_active?: boolean | null;
+  created_at: string;
+};
+
+type LinkVisitRow = {
+  id: string;
+  share_link_id: string;
+  ip?: string | null;
+  location?: string | null;
+  city?: string | null;
+  country?: string | null;
+  region?: string | null;
+  user_agent?: string | null;
+  referrer?: string | null;
+  visited_at: string;
+  duration_ms?: number | null;
+  entered_at?: string | null;
+  left_at?: string | null;
+  viewed_resume?: boolean | null;
+  downloaded_resume?: boolean | null;
+  resume_dwell_ms?: number | null;
+};
+
+type ModuleDwellRow = {
+  id: string;
+  visit_id: string;
+  share_link_id: string;
+  module_name: string;
+  dwell_time_ms?: number | null;
+  created_at: string;
+};
+
+type ClickEventRow = {
+  id: string;
+  visit_id: string;
+  share_link_id?: string | null;
+  event_type: string;
+  event_label: string;
+  created_at: string;
+};
+
 if (!supabaseUrl || !supabaseKey) {
   console.error('请在 .env.local 中设置 NEXT_PUBLIC_SUPABASE_URL 和 NEXT_PUBLIC_SUPABASE_ANON_KEY');
   process.exit(1);
 }
 
-async function supabaseFetch(table: string): Promise<any[]> {
+async function supabaseFetch<T>(table: string): Promise<T[]> {
   const url = `${supabaseUrl}/rest/v1/${table}?select=*`;
   const res = await fetch(url, {
     headers: {
@@ -26,7 +72,7 @@ async function supabaseFetch(table: string): Promise<any[]> {
   if (!res.ok) {
     throw new Error(`Failed to fetch ${table}: ${res.status} ${res.statusText}`);
   }
-  return res.json();
+  return res.json() as Promise<T[]>;
 }
 
 async function migrate() {
@@ -44,13 +90,13 @@ async function migrate() {
   db.exec(schema);
 
   console.log('Migrating share_links...');
-  const links = await supabaseFetch('share_links');
+  const links = await supabaseFetch<ShareLinkRow>('share_links');
   if (links && links.length > 0) {
     const insert = db.prepare(`
       INSERT INTO share_links (id, name, slug, click_count, is_active, created_at)
       VALUES (?, ?, ?, ?, ?, ?)
     `);
-    const insertMany = db.transaction((rows: any[]) => {
+    const insertMany = db.transaction((rows: ShareLinkRow[]) => {
       for (const row of rows) {
         insert.run(row.id, row.name, row.slug, row.click_count || 0, row.is_active ? 1 : 0, row.created_at);
       }
@@ -62,7 +108,7 @@ async function migrate() {
   }
 
   console.log('Migrating link_visits...');
-  const visits = await supabaseFetch('link_visits');
+  const visits = await supabaseFetch<LinkVisitRow>('link_visits');
   if (visits && visits.length > 0) {
     const insert = db.prepare(`
       INSERT INTO link_visits (
@@ -71,7 +117,7 @@ async function migrate() {
         viewed_resume, downloaded_resume, resume_dwell_ms
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    const insertMany = db.transaction((rows: any[]) => {
+    const insertMany = db.transaction((rows: LinkVisitRow[]) => {
       for (const row of rows) {
         insert.run(
           row.id, row.share_link_id, row.ip, row.location, row.city, row.country, row.region,
@@ -88,13 +134,13 @@ async function migrate() {
   }
 
   console.log('Migrating module_dwell_times...');
-  const dwells = await supabaseFetch('module_dwell_times');
+  const dwells = await supabaseFetch<ModuleDwellRow>('module_dwell_times');
   if (dwells && dwells.length > 0) {
     const insert = db.prepare(`
       INSERT INTO module_dwell_times (id, visit_id, share_link_id, module_name, dwell_time_ms, created_at)
       VALUES (?, ?, ?, ?, ?, ?)
     `);
-    const insertMany = db.transaction((rows: any[]) => {
+    const insertMany = db.transaction((rows: ModuleDwellRow[]) => {
       for (const row of rows) {
         insert.run(row.id, row.visit_id, row.share_link_id, row.module_name, row.dwell_time_ms || 0, row.created_at);
       }
@@ -106,13 +152,13 @@ async function migrate() {
   }
 
   console.log('Migrating click_events...');
-  const clicks = await supabaseFetch('click_events');
+  const clicks = await supabaseFetch<ClickEventRow>('click_events');
   if (clicks && clicks.length > 0) {
     const insert = db.prepare(`
       INSERT INTO click_events (id, visit_id, share_link_id, event_type, event_label, created_at)
       VALUES (?, ?, ?, ?, ?, ?)
     `);
-    const insertMany = db.transaction((rows: any[]) => {
+    const insertMany = db.transaction((rows: ClickEventRow[]) => {
       for (const row of rows) {
         insert.run(row.id, row.visit_id, row.share_link_id, row.event_type, row.event_label, row.created_at);
       }

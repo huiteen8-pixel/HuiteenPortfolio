@@ -1,0 +1,64 @@
+# Verify the certificate paths and upstream port before deploying.
+server {
+    listen 80 default_server;
+    server_name _;
+    return 444;
+}
+
+server {
+    listen 80;
+    server_name huiteen.com www.huiteen.com;
+    return 301 https://huiteen.com$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name www.huiteen.com;
+
+    ssl_certificate /etc/letsencrypt/live/huiteen.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/huiteen.com/privkey.pem;
+
+    return 301 https://huiteen.com$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name huiteen.com;
+
+    # A forged Host must never reach Next.js or influence a redirect.
+    if ($host != huiteen.com) { return 444; }
+
+    # Analytics JSON bodies are at most 16 KiB in the application. Keep a small
+    # allowance while rejecting oversized bodies before they reach Node.js.
+    client_max_body_size 32k;
+
+    ssl_certificate /etc/letsencrypt/live/huiteen.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/huiteen.com/privkey.pem;
+
+    # Enable only after HTTPS works for the whole domain. Keep subdomains and
+    # preload out of the default until they have been reviewed separately.
+    add_header Strict-Transport-Security "max-age=31536000" always;
+
+    # Overwrite every forwarding header that a browser could have supplied.
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Port 443;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header CF-Connecting-IP "";
+    proxy_set_header Forwarded "";
+
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+        # This location declares its own add_header, so retain server-level HSTS.
+        add_header Strict-Transport-Security "max-age=31536000" always;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+    }
+}

@@ -1,13 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import SmoothScroll from '@/components/SmoothScroll';
+import MotionProvider from '@/components/MotionProvider';
 import CustomCursor from '@/components/CustomCursor';
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export const metadata: Metadata = {
@@ -28,10 +26,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Huiteen' }],
   icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/profile/tab-logo.png', type: 'image/png' },
-    ],
+    icon: [{ url: '/profile/tab-logo.png', type: 'image/png' }],
     apple: [{ url: '/profile/tab-logo.png', type: 'image/png' }],
   },
   openGraph: {
@@ -55,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body className="antialiased font-serif" suppressHydrationWarning>
-        <SmoothScroll>{children}</SmoothScroll>
+        <MotionProvider>{children}</MotionProvider>
         <CustomCursor />
       </body>
     </html>

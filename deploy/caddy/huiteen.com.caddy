@@ -1,0 +1,40 @@
+# These blocks are appended to the shared edge Caddyfile only after DNS points
+# to the target server and the candidate container passes its private checks.
+www.huiteen.com {
+	redir https://huiteen.com{uri} permanent
+}
+
+huiteen.com {
+	encode zstd gzip
+
+	log {
+		format json
+	}
+
+	request_body {
+		max_size 32KB
+	}
+
+	header {
+		-Server
+		-X-Powered-By
+		Strict-Transport-Security "max-age=31536000"
+	}
+
+	@next_static path /_next/static/*
+	header @next_static Cache-Control "public, max-age=31536000, immutable"
+
+	@analytics path /analytics /analytics/* /api/analytics/*
+	header @analytics Cache-Control "no-store"
+
+	reverse_proxy huiteen-portfolio:3000 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-Port 443
+		header_up X-Forwarded-Proto {scheme}
+		header_up -CF-Connecting-IP
+		header_up -Forwarded
+	}
+}

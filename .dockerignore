@@ -1,0 +1,53 @@
+# Source-control and local tooling metadata
+.git
+.github
+.codex
+.openai
+.mcp.json
+.DS_Store
+.idea
+.vscode
+
+# Dependencies and generated output must be rebuilt inside Linux
+node_modules
+.next
+out
+dist
+coverage
+*.tsbuildinfo
+next-env.d.ts
+
+# Runtime data and credentials must never enter the build context
+.env
+.env.*
+.npmrc
+*.pem
+*.key
+*.p12
+*.pfx
+data
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-*
+
+# Logs, local deployment artifacts, and design/reference material
+*.log
+pnpm-debug.log*
+npm-debug.log*
+REFERENCE
+DOCUMENT
+vedio
+runtime
+backups
+
+# Files not required by the application build
+docs
+deploy
+compose*.yml
+docker-compose*.yml
+README.md
+SECURITY.md
+CLAUDE.md
+AGENTS.md

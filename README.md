@@ -1,112 +1,86 @@
-# 任睿个人简历网站 (RenRui Web Resume)
+# Huiteen Portfolio
 
-基于 Next.js 16 + Supabase 的全栈个人简历展示网站，集成埋点分析系统。
+郑惠文（Huiteen）的交互与服务设计作品集。网站以单页编辑式叙事展示系统设计、数字产品、数据可视化和跨媒介项目，并包含一套可选的私有访问分析后台。
 
-🔗 **线上地址**: [ooooyasumi.com](https://ooooyasumi.com)
-
-## 快速开始
-
-```bash
-# 1. 克隆项目
-git clone <repo-url> && cd RenRuiWebResume
-
-# 2. 配置环境变量
-cp .env.example .env.local
-# 编辑 .env.local 填入实际的 Supabase 和 COS 密钥
-
-# 3. 安装依赖 (必须使用 pnpm)
-pnpm install
-
-# 4. 启动开发服务器
-pnpm dev
-# 打开 http://localhost:5000
-```
-
-## 可用命令
-
-| 命令 | 说明 |
-|------|------|
-| `pnpm dev` | 启动开发服务器 |
-| `pnpm build` | 构建生产版本 (standalone 模式) |
-| `pnpm start` | 启动生产服务器 |
-| `pnpm lint` | 运行 ESLint |
-| `pnpm ts-check` | TypeScript 类型检查 |
-
-## 项目结构
-
-```
-src/
-├── app/                    # Next.js App Router
-│   ├── page.tsx            # 首页 (单页面，包含所有区块)
-│   ├── layout.tsx          # 根布局
-│   ├── globals.css         # 全局样式 + 主题变量
-│   ├── analytics/          # 埋点仪表盘页面
-│   └── api/analytics/      # 埋点分析 API (9个端点)
-├── components/
-│   ├── ui/                 # shadcn/ui 组件库
-│   ├── CustomCursor.tsx    # 自定义光标
-│   ├── ScrollReveal.tsx    # 滚动揭示动画
-│   ├── CountUp.tsx         # 数字计数动画
-│   ├── VideoPlayer.tsx     # 视频播放器
-│   ├── ImageGallery.tsx    # 图片画廊
-│   ├── ResumeViewer.tsx    # 简历在线预览
-│   └── TrackerProvider.tsx # 埋点追踪提供者
-├── hooks/                  # 自定义 Hooks (埋点追踪、时长统计等)
-└── lib/                    # 工具库 (Supabase 客户端、cn 工具)
-db/                         # Supabase 数据库初始化脚本
-deploy/nginx/               # Nginx 部署配置
-scripts/                    # 构建/启动/上传脚本
-```
+线上站点：[https://huiteen.com](https://huiteen.com)
 
 ## 技术栈
 
-| 类别 | 技术 |
-|------|------|
-| 框架 | Next.js 16 (App Router) |
-| UI | React 19, shadcn/ui, Tailwind CSS 4 |
-| 动画 | framer-motion, lenis, GSAP |
-| 后端 | Next.js API Routes |
-| 数据库 | Supabase (PostgreSQL) |
-| 存储 | 腾讯云 COS |
-| 图表 | Recharts |
-| 包管理 | pnpm ≥9 |
+- Next.js 16（App Router）、React 19、TypeScript 5
+- Tailwind CSS 4、shadcn/ui（Radix UI）
+- Framer Motion
+- Next.js Route Handlers、SQLite（`better-sqlite3`）
+- pnpm 9+
 
-## 功能特性
+## 本地启动
 
-- 📄 单页面简历展示 (Hero、技能、经历、作品、兴趣、Connect)
-- 📊 完整的埋点分析系统 (访问/点击/停留时长/模块曝光)
-- 🎬 视频背景 + 鼠标视差效果
-- 🌓 亮色/暗色模式切换
-- 📝 简历在线预览 (iframe PDF)
-- 🖼️ 作品图片画廊
-- ✨ 滚动揭示 + 数字计数动画
-- 📱 响应式设计
-
-## 部署
-
-项目使用 `standalone` 输出模式部署到 Linux + Nginx 服务器。
+需要 Node.js 20.19 或更高版本、pnpm 9 或更高版本。项目只允许使用 pnpm。
 
 ```bash
-# 配置部署信息后运行
-bash deploy.sh
+git clone https://github.com/huiteen8-pixel/HuiteenPortfolio.git
+cd HuiteenPortfolio
+cp .env.example .env.local
+pnpm install
+pnpm dev
 ```
 
-Nginx 配置文件位于 `deploy/nginx/`。
+默认开发地址为 `http://127.0.0.1:3001`。本地开发和检查可在 Windows、macOS 或 Linux 上运行；生产 release 含 `better-sqlite3` 原生模块，不能跨操作系统、CPU 架构、libc 或 Node ABI 复制，必须在与 Linux 目标匹配的 CI/container/WSL 环境构建。
 
-## 数据库初始化
+如果只预览作品集，`.env.example` 中的邮件通知可保持关闭。需要使用 `/analytics` 时，必须先配置管理员密码；生产环境要求至少 16 个字符。完整变量说明见 [`.env.example`](.env.example)。
 
-在 Supabase SQL Editor 中按顺序执行 `db/` 目录下的 SQL 文件：
+## 常用命令
 
-1. `supabase-init.sql` — 初始化
-2. `supabase-schema.sql` — 创建表结构
-3. `supabase-rpc.sql` — 创建 RPC 函数
+| 命令 | 说明 |
+| --- | --- |
+| `pnpm dev` | 在 3001 端口启动开发服务器 |
+| `pnpm build` | 使用 Webpack 构建 Next.js standalone 产物 |
+| `pnpm start` | 在 `127.0.0.1:3001` 启动 standalone 生产预览（可用 `PORTFOLIO_BIND_HOST` / `PORTFOLIO_PORT` 覆盖） |
+| `pnpm lint` | 运行 ESLint |
+| `pnpm ts-check` | 运行 TypeScript 类型检查 |
 
-或在 Node.js 环境运行 `db/setup-db.js`。
+构建命令显式使用 Webpack，避免 Next.js Turbopack 在 Windows 非 ASCII 工作路径下的已知崩溃。本地生产预览通过项目专用的 `PORTFOLIO_BIND_HOST` / `PORTFOLIO_PORT` 控制监听地址；正式部署直接运行 Next.js 生成的 standalone server，并由服务管理器注入 `HOSTNAME` / `PORT`。完整发布方式见 [`docs/deployment.md`](docs/deployment.md)。
 
-## 开发规范
+## 项目结构
 
-1. **pnpm only** — 项目已配置 preinstall 强制检查
-2. **shadcn/ui 优先** — 基础 UI 使用 `src/components/ui/` 下的组件
-3. **TypeScript 严格模式** — 所有新代码需通过类型检查
-4. **Hydration 安全** — 浏览器 API 在 `useEffect` 中使用，避免 SSR 水合错误
-5. **环境变量** — 客户端可用的变量以 `NEXT_PUBLIC_` 开头
+```text
+public/
+├── profile/                  # 个人形象与站点图标
+└── projects/                 # 作品图片、GIF 和视频
+src/
+├── app/
+│   ├── page.tsx              # 作品集首页与项目数据
+│   ├── analytics/            # 受保护的分析后台
+│   └── api/analytics/        # 访问与事件分析 API
+├── components/               # 作品展示组件与 shadcn/ui
+├── hooks/                    # 响应式与可选埋点 hooks
+└── lib/                      # SQLite、邮件与通用工具
+scripts/                       # 构建、开发和启动脚本
+docs/                          # 部署与作品内容维护文档
+```
+
+## 分析数据
+
+分析功能使用 SQLite，本地开发数据库默认位于 `data/analytics.db`。该文件是运行时私有数据，不得提交到 Git、打包到公开制品或放在 Web 目录中。生产部署必须通过 `SQLITE_DB_PATH` 指向发布目录之外的绝对持久化路径；相对路径和 release 内路径会被拒绝。
+
+首页只会在 URL 带有非空 `?ref=<分享链接 slug>` 时启动访问与停留追踪；普通直接访问不建立分析记录。同一浏览会话切换到不同 `ref` 时会创建新 visit，不复用前一条分享链接的凭据。
+
+原始访问记录默认保留 90 天，并按每条分享链接最多 10,000 次访问滚动清理，可用 `ANALYTICS_RETENTION_DAYS` 缩短保留期。公开埋点用于趋势判断，不是审计日志：持有有效分享链接和临时 visit token 的访问者仍可能制造噪声，统计结果应按近似值解读。
+
+本仓库的早期历史曾包含分析数据库。删除当前文件不代表历史已清除：相关 SMTP 凭据必须轮换，并在发布前完成 Git 历史清理。详见 [`SECURITY.md`](SECURITY.md)。
+
+## 作品内容维护
+
+作品集当前收录 9 组内容。对外发布前，所有项目必须区分“已验证结果”、“设计产出”与“预期价值”，不得补写无来源的研究样本、测试数据或合作关系。项目缺口和采集模板见 [`docs/portfolio-content.md`](docs/portfolio-content.md)。
+
+## 构建与部署
+
+这是需要 Node.js 运行时的 Next.js 应用，不是纯静态站点。Nginx 应反向代理到 Node.js 进程，而不是使用 `try_files` 直接寻找 HTML。完整的 standalone 打包、SQLite 持久化、systemd 与 Nginx 配置见 [`docs/deployment.md`](docs/deployment.md)。
+
+`deploy.sh` 会把完整 standalone 产物上传到唯一、非符号链接的 `releases/<id>`，在本地和远端拦截 `.env*` 与 SQLite 产物，再原子更新 `current`。配置重启与健康检查后，失败会自动切回 `previous` 并重启；健康检查不允许在缺少重启命令时运行。`DEPLOY_TARGET_DIR` 应填写受 `DEPLOY_ALLOWED_BASE` 限制的规范部署根目录（如 `/srv/huiteen-portfolio`），而不是 `current`。Linux 与 Windows WSL 示例及上线验收见 [`docs/deployment.md`](docs/deployment.md)。
+
+## 安全与隐私
+
+- 不要提交 `.env*`、SQLite 文件、SMTP 密码、会话密钥或真实访问记录。
+- `/analytics` 与管理类 API 只能通过 HTTPS 访问，并必须启用服务端认证。
+- 收集 IP、User-Agent 和 Referrer 前，需确认部署地区的隐私告知、数据最小化和保留期要求。
+- 发现漏洞或凭据暴露时，不要在公开 Issue 中粘贴秘密或访问数据；按 [`SECURITY.md`](SECURITY.md) 处理。

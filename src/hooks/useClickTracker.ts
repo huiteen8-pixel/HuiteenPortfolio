@@ -6,8 +6,10 @@ import { useEffect } from 'react';
  * 全局站外链接点击追踪
  * 自动拦截所有指向外部域名的 <a> 标签点击并上报
  */
-export function useClickTracker() {
+export function useClickTracker(visitId: string | null, visitToken: string | null) {
   useEffect(() => {
+    if (!visitId || !visitToken) return;
+
     const handleClick = (e: MouseEvent) => {
       // 向上查找最近的 <a> 标签
       let target = e.target as HTMLElement | null;
@@ -22,21 +24,16 @@ export function useClickTracker() {
       // 只追踪站外链接
       if (!isExternalLink(href)) return;
 
-      // 检查是否有显式 data-track-event 属性（允许页面定制 event_type）
-      const eventType = anchor.getAttribute('data-track-event') || 'external_link';
-
-      // event_label: 优先用 data-track-label，其次是链接文字，最后是 hostname
-      const eventLabel =
-        anchor.getAttribute('data-track-label') ||
-        (anchor.textContent?.trim().slice(0, 80) || '') ||
-        getHostname(href);
-
-      const visitId = sessionStorage.getItem('visit_id');
-      if (!visitId) return;
+      // 只上报页面明确标记、且服务端另行做白名单校验的稳定 ID；
+      // 链接文字不会进入数据库。
+      const eventType = 'external_link';
+      const eventLabel = anchor.dataset.trackLabel;
+      if (!eventLabel) return;
 
       // sendBeacon 确保页面跳转前发送成功
       const payload = JSON.stringify({
         visit_id: visitId,
+        token: visitToken,
         event_type: eventType,
         event_label: eventLabel,
       });
@@ -45,7 +42,7 @@ export function useClickTracker() {
 
     document.addEventListener('click', handleClick, true);
     return () => document.removeEventListener('click', handleClick, true);
-  }, []);
+  }, [visitId, visitToken]);
 }
 
 function isExternalLink(href: string): boolean {
@@ -61,13 +58,5 @@ function isExternalLink(href: string): boolean {
     return true;
   } catch {
     return false;
-  }
-}
-
-function getHostname(href: string): string {
-  try {
-    return new URL(href).hostname;
-  } catch {
-    return href;
   }
 }

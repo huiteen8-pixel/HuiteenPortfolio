@@ -1,0 +1,68 @@
+name: huiteen-portfolio
+
+services:
+  app:
+    image: huiteen-portfolio:${HUITEEN_IMAGE_TAG:-candidate}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_BUILD_IMAGE: ${HUITEEN_NODE_BUILD_IMAGE:-node:22-bookworm}
+        NODE_RUNTIME_IMAGE: ${HUITEEN_NODE_RUNTIME_IMAGE:-node:22-bookworm-slim}
+    restart: unless-stopped
+    init: true
+    user: "10001:10001"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    cpus: "1.0"
+    mem_limit: 768m
+    mem_reservation: 256m
+    stop_grace_period: 20s
+    ports:
+      - "127.0.0.1:${HUITEEN_CANDIDATE_PORT:-5101}:3000"
+    env_file:
+      - path: ${HUITEEN_ENV_FILE:-/etc/huiteen-portfolio/portfolio.env}
+        required: true
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+      SQLITE_DB_PATH: /var/lib/huiteen-portfolio/analytics.db
+    volumes:
+      - analytics-data:/var/lib/huiteen-portfolio
+    tmpfs:
+      - /tmp:size=64m,mode=1777,uid=10001,gid=10001,nosuid,nodev,noexec
+      - /app/.next/cache:size=64m,mode=0750,uid=10001,gid=10001,nosuid,nodev
+    networks:
+      edge:
+        aliases:
+          - huiteen-portfolio
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/robots.txt').then((response) => { if (!response.ok) process.exit(1) }).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  analytics-data:
+    driver: local
+
+networks:
+  edge:
+    name: huiteen-portfolio-edge
+    driver: bridge

@@ -1,12 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db';
+import { analyticsJson, isAnalyticsAdmin, unauthorizedAnalyticsResponse } from '@/lib/analytics-auth';
+import { analyticsPayloadError, isValidUuid } from '@/lib/analytics-api';
 
 // GET /api/analytics/visits?link_id=xxx — get visits for a share link
 export async function GET(req: NextRequest) {
+  if (!isAnalyticsAdmin(req)) return unauthorizedAnalyticsResponse();
+
   try {
     const linkId = req.nextUrl.searchParams.get('link_id');
-    if (!linkId) {
-      return NextResponse.json({ error: 'link_id is required' }, { status: 400 });
+    if (!isValidUuid(linkId)) {
+      return analyticsJson({ error: 'valid link_id is required' }, { status: 400 });
     }
 
     const db = getDb();
@@ -19,9 +23,8 @@ export async function GET(req: NextRequest) {
       LIMIT 500
     `).all(linkId);
 
-    return NextResponse.json(rows);
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return analyticsJson(rows);
+  } catch (error: unknown) {
+    return analyticsPayloadError(error);
   }
 }

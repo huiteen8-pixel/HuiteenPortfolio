@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS link_visits (
     left_at TEXT,
     completed_at TEXT,
     summary_email_sent_at TEXT,
+    summary_email_attempted_at TEXT,
     summary_email_error TEXT,
     viewed_resume INTEGER NOT NULL DEFAULT 0,
     downloaded_resume INTEGER NOT NULL DEFAULT 0,
@@ -78,6 +79,7 @@ CREATE TABLE IF NOT EXISTS analytics_email_settings (
 -- 索引
 CREATE INDEX IF NOT EXISTS idx_link_visits_share_link_id ON link_visits(share_link_id);
 CREATE INDEX IF NOT EXISTS idx_link_visits_visited_at ON link_visits(visited_at);
+CREATE INDEX IF NOT EXISTS idx_link_visits_share_link_visited_at ON link_visits(share_link_id, visited_at);
 CREATE INDEX IF NOT EXISTS idx_share_links_slug ON share_links(slug);
 CREATE INDEX IF NOT EXISTS idx_module_dwell_visit_id ON module_dwell_times(visit_id);
 CREATE INDEX IF NOT EXISTS idx_module_dwell_share_link_id ON module_dwell_times(share_link_id);

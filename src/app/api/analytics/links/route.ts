@@ -1,13 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { randomBytes } from 'node:crypto';
 import { getDb, generateUUID } from '@/lib/db';
+import { analyticsJson, isAnalyticsAdmin, unauthorizedAnalyticsResponse } from '@/lib/analytics-auth';
+import {
+  analyticsPayloadError,
+  boundedString,
+  isValidUuid,
+  readAnalyticsJson,
+  rejectCrossSiteRequest,
+} from '@/lib/analytics-api';
 
 // POST /api/analytics/links — create a new share link
 export async function POST(req: NextRequest) {
+  if (!isAnalyticsAdmin(req)) return unauthorizedAnalyticsResponse();
+  const crossSite = rejectCrossSiteRequest(req);
+  if (crossSite) return crossSite;
+
   try {
-    const body = await req.json();
-    const { name } = body;
-    if (!name || typeof name !== 'string' || name.trim().length === 0) {
-      return NextResponse.json({ error: 'name is required' }, { status: 400 });
+    const body = await readAnalyticsJson(req);
+    const name = boundedString(body.name, 100);
+    if (!name) {
+      return analyticsJson({ error: 'name is required' }, { status: 400 });
     }
 
     const slug = generateSlug();
@@ -18,15 +31,16 @@ export async function POST(req: NextRequest) {
       RETURNING id, name, slug, click_count, is_active, created_at
     `).get(generateUUID(), name.trim(), slug, new Date().toISOString());
 
-    return NextResponse.json(result);
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return analyticsJson(result, { status: 201 });
+  } catch (error: unknown) {
+    return analyticsPayloadError(error);
   }
 }
 
 // GET /api/analytics/links — list all share links
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!isAnalyticsAdmin(req)) return unauthorizedAnalyticsResponse();
+
   try {
     const db = getDb();
     const rows = db.prepare(`
@@ -35,36 +49,34 @@ export async function GET() {
       ORDER BY created_at DESC
     `).all();
 
-    return NextResponse.json(rows);
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return analyticsJson(rows);
+  } catch (error: unknown) {
+    return analyticsPayloadError(error);
   }
 }
 
 // DELETE /api/analytics/links?id=xxx — delete a share link
 export async function DELETE(req: NextRequest) {
+  if (!isAnalyticsAdmin(req)) return unauthorizedAnalyticsResponse();
+  const crossSite = rejectCrossSiteRequest(req);
+  if (crossSite) return crossSite;
+
   try {
     const id = req.nextUrl.searchParams.get('id');
-    if (!id) {
-      return NextResponse.json({ error: 'id is required' }, { status: 400 });
+    if (!isValidUuid(id)) {
+      return analyticsJson({ error: 'valid id is required' }, { status: 400 });
     }
 
     const db = getDb();
     db.prepare('DELETE FROM share_links WHERE id = ?').run(id);
 
-    return NextResponse.json({ success: true });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return analyticsJson({ success: true });
+  } catch (error: unknown) {
+    return analyticsPayloadError(error);
   }
 }
 
 function generateSlug(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+  return Array.from(randomBytes(10), (byte) => chars[byte % chars.length]).join('');
 }

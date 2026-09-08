@@ -7,7 +7,7 @@ import { motion, useMotionValue, useSpring } from 'framer-motion';
 export default function CustomCursor() {
   const [isHovering, setIsHovering] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(false);
   const styleRef = useRef<HTMLStyleElement | null>(null);
 
   const pointerX = useMotionValue(-100);
@@ -17,14 +17,26 @@ export default function CustomCursor() {
   const outerY = useSpring(pointerY, { damping: 25, stiffness: 400 });
 
   useEffect(() => {
-    setMounted(true);
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const finePointerQuery = window.matchMedia('(pointer: fine)');
+
+    const updateEnabledState = () => {
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      setIsEnabled(!isTouchDevice && finePointerQuery.matches && !reducedMotionQuery.matches);
+    };
+
+    updateEnabledState();
+    reducedMotionQuery.addEventListener('change', updateEnabledState);
+    finePointerQuery.addEventListener('change', updateEnabledState);
+
+    return () => {
+      reducedMotionQuery.removeEventListener('change', updateEnabledState);
+      finePointerQuery.removeEventListener('change', updateEnabledState);
+    };
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
-
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isTouchDevice) return;
+    if (!isEnabled) return;
 
     const style = document.createElement('style');
     style.textContent = `
@@ -37,7 +49,8 @@ export default function CustomCursor() {
     const moveCursor = (event: MouseEvent) => {
       pointerX.set(event.clientX);
       pointerY.set(event.clientY);
-      setIsVisible(true);
+      const target = event.target instanceof Element ? event.target : null;
+      setIsVisible(!target?.closest('[data-native-cursor]'));
     };
 
     const handleMouseEnter = () => setIsVisible(true);
@@ -88,12 +101,9 @@ export default function CustomCursor() {
       document.removeEventListener('mouseenter', handleMouseEnter);
       document.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [mounted, pointerX, pointerY]);
+  }, [isEnabled, pointerX, pointerY]);
 
-  if (!mounted) return null;
-  if (typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
-    return null;
-  }
+  if (!isEnabled) return null;
 
   const baseStyle = {
     translateX: '-50%',

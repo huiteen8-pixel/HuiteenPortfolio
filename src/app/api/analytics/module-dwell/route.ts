@@ -1,42 +1,57 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { getDb, generateUUID, withTransaction } from '@/lib/db';
+import { analyticsJson, isAnalyticsAdmin, unauthorizedAnalyticsResponse } from '@/lib/analytics-auth';
+import {
+  analyticsPayloadError,
+  boundedDuration,
+  enforceAnalyticsRateLimit,
+  isValidModuleName,
+  isValidUuid,
+  readAnalyticsJson,
+  rejectCrossSiteRequest,
+  verifyVisitToken,
+} from '@/lib/analytics-api';
+
+type DwellRecord = { module_name: string; dwell_time_ms: number };
 
 // POST /api/analytics/module-dwell — record module dwell times
 export async function POST(req: NextRequest) {
-  try {
-    const contentType = req.headers.get('content-type') || '';
-    let body: Record<string, unknown>;
+  const crossSite = rejectCrossSiteRequest(req);
+  if (crossSite) return crossSite;
+  const limited = enforceAnalyticsRateLimit(req, 'module-dwell', 30, 60_000);
+  if (limited) return limited;
 
-    if (contentType.includes('text/plain')) {
-      const text = await req.text();
-      body = JSON.parse(text);
-    } else {
-      body = await req.json();
+  try {
+    const body = await readAnalyticsJson(req);
+    const visitId = body.visit_id;
+    if (!isValidUuid(visitId) || !verifyVisitToken(visitId, body.token)) {
+      return analyticsJson({ error: 'invalid visit credentials' }, { status: 403 });
     }
 
-    const { visit_id, share_link_id, records } = body as {
-      visit_id?: string;
-      share_link_id?: string;
-      records?: { module_name: string; dwell_time_ms: number }[];
-    };
+    if (!Array.isArray(body.records) || body.records.length === 0 || body.records.length > 32) {
+      return analyticsJson({ error: 'records must contain 1 to 32 items' }, { status: 400 });
+    }
 
-    if (!visit_id || !records || records.length === 0) {
-      return NextResponse.json({ error: 'visit_id and records are required' }, { status: 400 });
+    const records: DwellRecord[] = [];
+    for (const value of body.records) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        return analyticsJson({ error: 'invalid dwell record' }, { status: 400 });
+      }
+      const record = value as Record<string, unknown>;
+      const duration = boundedDuration(record.dwell_time_ms);
+      if (!isValidModuleName(record.module_name) || duration === null) {
+        return analyticsJson({ error: 'invalid dwell record' }, { status: 400 });
+      }
+      records.push({ module_name: record.module_name, dwell_time_ms: duration });
     }
 
     const db = getDb();
+    const visit = db.prepare('SELECT share_link_id FROM link_visits WHERE id = ?').get(visitId) as
+      | { share_link_id: string }
+      | undefined;
 
-    // Get share_link_id from visit if not provided
-    let linkId = share_link_id;
-    if (!linkId) {
-      const visit = db.prepare('SELECT share_link_id FROM link_visits WHERE id = ?').get(visit_id) as
-        | { share_link_id: string }
-        | undefined;
-      linkId = visit?.share_link_id;
-    }
-
-    if (!linkId) {
-      return NextResponse.json({ error: 'Could not determine share_link_id' }, { status: 400 });
+    if (!visit) {
+      return analyticsJson({ error: 'visit not found' }, { status: 404 });
     }
 
     withTransaction(() => {
@@ -44,7 +59,7 @@ export async function POST(req: NextRequest) {
         const existing = db.prepare(`
           SELECT id, dwell_time_ms FROM module_dwell_times
           WHERE visit_id = ? AND module_name = ?
-        `).get(visit_id, record.module_name) as
+        `).get(visitId, record.module_name) as
           | { id: string; dwell_time_ms: number }
           | undefined;
 
@@ -61,25 +76,26 @@ export async function POST(req: NextRequest) {
             INSERT INTO module_dwell_times (id, visit_id, share_link_id, module_name, dwell_time_ms, created_at)
             VALUES (?, ?, ?, ?, ?, ?)
           `).run(
-            generateUUID(), visit_id, linkId, record.module_name, record.dwell_time_ms, new Date().toISOString()
+            generateUUID(), visitId, visit.share_link_id, record.module_name, record.dwell_time_ms, new Date().toISOString()
           );
         }
       }
     });
 
-    return NextResponse.json({ success: true });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return analyticsJson({ success: true });
+  } catch (error: unknown) {
+    return analyticsPayloadError(error);
   }
 }
 
 // GET /api/analytics/module-dwell?visit_id=xxx — get module dwell times for a visit
 export async function GET(req: NextRequest) {
+  if (!isAnalyticsAdmin(req)) return unauthorizedAnalyticsResponse();
+
   try {
     const visitId = req.nextUrl.searchParams.get('visit_id');
-    if (!visitId) {
-      return NextResponse.json({ error: 'visit_id is required' }, { status: 400 });
+    if (!isValidUuid(visitId)) {
+      return analyticsJson({ error: 'valid visit_id is required' }, { status: 400 });
     }
 
     const db = getDb();
@@ -90,9 +106,8 @@ export async function GET(req: NextRequest) {
       ORDER BY dwell_time_ms DESC
     `).all(visitId);
 
-    return NextResponse.json(rows || []);
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return analyticsJson(rows || []);
+  } catch (error: unknown) {
+    return analyticsPayloadError(error);
   }
 }

@@ -17,9 +17,6 @@ type VisitSummary = {
   visited_at: string;
   left_at: string | null;
   duration_ms: number;
-  viewed_resume: number;
-  downloaded_resume: number;
-  resume_dwell_ms: number;
 };
 
 type ModuleDwell = {
@@ -34,20 +31,16 @@ type ClickStat = {
 
 const MODULE_LABELS: Record<string, string> = {
   about: 'Hero / 关于',
-  introduce: '个人介绍',
-  education: '教育背景',
-  workexperience: '工作经历',
-  technical: '技术项目',
-  skills: '技能',
-  connect: '联系方式',
+  profile: '个人介绍 / 教育',
+  skills: '方法与能力',
+  projects: '项目',
+  connect: 'Approach',
 };
 
 const CLICK_EVENT_LABELS: Record<string, string> = {
-  blog: '个人博客',
-  github: 'GitHub',
-  xhs: '小红书',
-  x: 'X',
-  bilibili: '哔哩哔哩',
+  'gafa-1': 'GAFA 1.0 在线导览',
+  'gafa-2': 'GAFA 2.0 楼层导览',
+  'emotional-lens': 'Emotional Lens 在线概念网页',
 };
 
 export async function sendVisitSummaryEmail(db: Database.Database, visitId: string, baseUrl: string) {
@@ -75,9 +68,6 @@ export async function sendVisitSummaryEmail(db: Database.Database, visitId: stri
       v.visited_at,
       v.left_at,
       v.duration_ms,
-      v.viewed_resume,
-      v.downloaded_resume,
-      v.resume_dwell_ms,
       l.name AS link_name,
       l.slug
     FROM link_visits v
@@ -105,13 +95,16 @@ export async function sendVisitSummaryEmail(db: Database.Database, visitId: stri
     host: settings.smtp_host,
     port: Number(settings.smtp_port || 465),
     secure: settings.smtp_secure,
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
     auth: {
       user: settings.smtp_user,
       pass: settings.smtp_pass,
     },
   });
 
-  const subject = `简历访问总结：${visit.link_name} (${formatDuration(visit.duration_ms)})`;
+  const subject = `作品集访问总结：${visit.link_name} (${formatDuration(visit.duration_ms)})`;
   await transporter.sendMail({
     from: settings.smtp_from || settings.smtp_user,
     to: settings.recipient_email,
@@ -167,7 +160,7 @@ function renderVisitSummaryHtml(
     <div style="max-width:720px;margin:0 auto;padding:28px 16px;">
       <div style="background:#ffffff;border:1px solid #e7e5e4;border-radius:14px;overflow:hidden;">
         <div style="padding:24px 28px;border-bottom:1px solid #e7e5e4;">
-          <p style="margin:0 0 8px;color:#78716c;font-size:13px;">简历访问完成</p>
+          <p style="margin:0 0 8px;color:#78716c;font-size:13px;">作品集访问完成</p>
           <h1 style="margin:0;font-size:24px;line-height:1.25;color:#1c1917;">${escapeHtml(visit.link_name)}</h1>
           <p style="margin:10px 0 0;color:#78716c;font-size:14px;">分享链接：<strong>${escapeHtml(visit.slug)}</strong></p>
         </div>
@@ -189,7 +182,6 @@ function renderVisitSummaryHtml(
             ${detailRow('IP', visit.ip || '未知')}
             ${detailRow('设备 / 浏览器', `${device} / ${browser}`)}
             ${detailRow('来源', visit.referrer || '直接访问')}
-            ${detailRow('简历互动', `${visit.viewed_resume ? '已查看' : '未查看'} / ${visit.downloaded_resume ? '已下载' : '未下载'}`)}
           </table>
 
           <h2 style="font-size:15px;margin:0 0 12px;color:#44403c;">板块停留</h2>

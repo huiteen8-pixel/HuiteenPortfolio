@@ -1,0 +1,6 @@
+packages:
+  - '.'
+
+overrides:
+  '@humanfs/node@0.16.7': 0.16.8
+  'picomatch@2.3.1': 2.3.2

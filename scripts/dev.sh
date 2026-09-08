@@ -2,33 +2,11 @@
 set -Eeuo pipefail
 
 
-PORT=3001
 COZE_WORKSPACE_PATH="${COZE_WORKSPACE_PATH:-$(pwd)}"
-DEPLOY_RUN_PORT=3001
-
+DEV_PORT="${DEPLOY_RUN_PORT:-3001}"
+DEV_BIND_HOST="${DEV_BIND_HOST:-127.0.0.1}"
 
 cd "${COZE_WORKSPACE_PATH}"
 
-kill_port_if_listening() {
-    local pids
-    pids=$(ss -H -lntp 2>/dev/null | awk -v port="${DEPLOY_RUN_PORT}" '$4 ~ ":"port"$"' | grep -o 'pid=[0-9]*' | cut -d= -f2 | paste -sd' ' - || true)
-    if [[ -z "${pids}" ]]; then
-      echo "Port ${DEPLOY_RUN_PORT} is free."
-      return
-    fi
-    echo "Port ${DEPLOY_RUN_PORT} in use by PIDs: ${pids} (SIGKILL)"
-    echo "${pids}" | xargs -I {} kill -9 {}
-    sleep 1
-    pids=$(ss -H -lntp 2>/dev/null | awk -v port="${DEPLOY_RUN_PORT}" '$4 ~ ":"port"$"' | grep -o 'pid=[0-9]*' | cut -d= -f2 | paste -sd' ' - || true)
-    if [[ -n "${pids}" ]]; then
-      echo "Warning: port ${DEPLOY_RUN_PORT} still busy after SIGKILL, PIDs: ${pids}"
-    else
-      echo "Port ${DEPLOY_RUN_PORT} cleared."
-    fi
-}
-
-echo "Clearing port ${PORT} before start."
-kill_port_if_listening
-echo "Starting HTTP service on port ${PORT} for dev..."
-
-PORT=$PORT pnpm tsx watch src/server.ts
+echo "Starting Next.js development server on ${DEV_BIND_HOST}:${DEV_PORT}..."
+exec pnpm exec next dev --webpack -H "${DEV_BIND_HOST}" -p "${DEV_PORT}"

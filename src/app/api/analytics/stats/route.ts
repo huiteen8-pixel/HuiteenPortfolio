@@ -1,12 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db';
+import { analyticsJson, isAnalyticsAdmin, unauthorizedAnalyticsResponse } from '@/lib/analytics-auth';
+import { analyticsPayloadError, isValidUuid } from '@/lib/analytics-api';
 
 // GET /api/analytics/stats?link_id=xxx — get analytics stats for a share link
 export async function GET(req: NextRequest) {
+  if (!isAnalyticsAdmin(req)) return unauthorizedAnalyticsResponse();
+
   try {
     const linkId = req.nextUrl.searchParams.get('link_id');
-    if (!linkId) {
-      return NextResponse.json({ error: 'link_id is required' }, { status: 400 });
+    if (!isValidUuid(linkId)) {
+      return analyticsJson({ error: 'valid link_id is required' }, { status: 400 });
     }
 
     const db = getDb();
@@ -18,7 +22,8 @@ export async function GET(req: NextRequest) {
 
     // 2. Unique IPs
     const ipRows = db.prepare(`
-      SELECT DISTINCT ip FROM link_visits WHERE share_link_id = ?
+      SELECT DISTINCT ip FROM link_visits
+      WHERE share_link_id = ? AND ip IS NOT NULL AND ip <> ''
     `).all(linkId) as { ip: string }[];
     const uniqueIps = ipRows.length;
 
@@ -120,20 +125,15 @@ export async function GET(req: NextRequest) {
     const resumeDownloaded = resumeRows.filter((v) => v.downloaded_resume === 1).length;
 
     // 8. Click event stats
-    const clickRows = db.prepare(`
-      SELECT event_type, event_label FROM click_events WHERE share_link_id = ?
-    `).all(linkId) as { event_type: string; event_label: string }[];
+    const clickEventStats = db.prepare(`
+      SELECT event_label, COUNT(*) AS count
+      FROM click_events
+      WHERE share_link_id = ?
+      GROUP BY event_label
+      ORDER BY count DESC, event_label ASC
+    `).all(linkId) as { event_label: string; count: number }[];
 
-    const clickEventMap: Record<string, number> = {};
-    clickRows.forEach((e) => {
-      clickEventMap[e.event_label] = (clickEventMap[e.event_label] || 0) + 1;
-    });
-
-    const clickEventStats = Object.entries(clickEventMap)
-      .map(([label, count]) => ({ event_label: label, count }))
-      .sort((a, b) => b.count - a.count);
-
-    return NextResponse.json({
+    return analyticsJson({
       total_visits: totalVisits?.count || 0,
       unique_visitors: uniqueIps,
       total_duration_ms: totalDurationMs,
@@ -146,9 +146,8 @@ export async function GET(req: NextRequest) {
       resume_downloaded: resumeDownloaded,
       click_events: clickEventStats,
     });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (error: unknown) {
+    return analyticsPayloadError(error);
   }
 }
 

@@ -1,40 +1,36 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useVisitTracker } from '@/hooks/useVisitTracker';
 import { useVisitDuration } from '@/hooks/useVisitDuration';
 import { useModuleTracker } from '@/hooks/useModuleTracker';
 import { useClickTracker } from '@/hooks/useClickTracker';
 
-function TrackerInner() {
-  useVisitTracker();
-  useClickTracker();
-  const [visitId, setVisitId] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Poll for visit_id from sessionStorage
-    const checkVisitId = () => {
-      const stored = sessionStorage.getItem('visit_id');
-      if (stored) {
-        setVisitId(stored);
-      }
-    };
-
-    checkVisitId();
-    const poll = setInterval(checkVisitId, 500);
-    return () => clearInterval(poll);
-  }, []);
-
-  useVisitDuration(visitId);
-  useModuleTracker();
+function TrackerInner({ refSlug }: { refSlug: string }) {
+  const credentials = useVisitTracker(refSlug);
+  useClickTracker(credentials.visitId, credentials.token);
+  useVisitDuration(credentials.visitId, credentials.token);
+  useModuleTracker(credentials.visitId, credentials.token);
 
   return null;
+}
+
+function TrackerGate() {
+  const searchParams = useSearchParams();
+  const refSlug = searchParams.get('ref')?.trim();
+
+  if (!refSlug) {
+    return null;
+  }
+
+  return <TrackerInner key={refSlug} refSlug={refSlug} />;
 }
 
 export function TrackerProvider() {
   return (
     <Suspense fallback={null}>
-      <TrackerInner />
+      <TrackerGate />
     </Suspense>
   );
 }

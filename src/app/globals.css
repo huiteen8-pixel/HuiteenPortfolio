@@ -3,7 +3,7 @@
 
 @font-face {
   font-family: 'Noto Serif SC Critical';
-  src: url('https://web-resource-1372876299.cos.ap-guangzhou.myqcloud.com/RenRuiWebResume/fonts/subset/NotoSerifSC-Critical.woff2') format('woff2');
+  src: url('/fonts/NotoSerifSC-Critical.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -11,7 +11,7 @@
 
 @font-face {
   font-family: 'Noto Serif SC';
-  src: url('https://web-resource-1372876299.cos.ap-guangzhou.myqcloud.com/RenRuiWebResume/fonts/subset/NotoSerifSC-Regular-Subset.woff2') format('woff2');
+  src: url('/fonts/NotoSerifSC-Regular-Subset.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -19,7 +19,7 @@
 
 @font-face {
   font-family: 'Noto Serif SC';
-  src: url('https://web-resource-1372876299.cos.ap-guangzhou.myqcloud.com/RenRuiWebResume/fonts/subset/NotoSerifSC-SemiBold-Subset.woff2') format('woff2');
+  src: url('/fonts/NotoSerifSC-SemiBold-Subset.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -81,92 +81,101 @@ img {
   display: none;
 }
 
-@keyframes fade-in {
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  .gallery-image {
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .gallery-trigger:hover {
+    border-color: #c9c0b6;
+    box-shadow: 0 18px 40px rgba(24, 20, 16, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .gallery-trigger:hover .gallery-image {
+    transform: scale(1.012);
+  }
+}
+
+@keyframes hero-reveal {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translate3d(0, 24px, 0) scale(0.992);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.8s ease-out;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
-@keyframes gradient-slide {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-.animate-gradient-slide {
-  animation: gradient-slide 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
-}
-
-@keyframes hero-entrance {
-  0% {
-    opacity: 0;
-    filter: blur(16px);
-    transform: translateX(-80px);
-  }
-  100% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translateX(0);
-  }
-}
-
-.hero-text {
-  animation: hero-entrance 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  will-change: transform, opacity, filter;
-}
-
-.hero-text-delay-1 {
-  animation-delay: 0.15s;
-  opacity: 0;
-}
-
-.hero-text-delay-2 {
-  animation-delay: 0.35s;
-  opacity: 0;
-}
-
-@keyframes story-expand {
+@keyframes hero-tag-reveal {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translate3d(0, 10px, 0) scale(0.97);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
-.animate-story-expand {
-  animation: story-expand 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+@keyframes hero-rule-reveal {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+.hero-rule-top {
+  transform-origin: left center;
+}
+
+.hero-rule-bottom {
+  transform-origin: right center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-reveal {
+    animation: hero-reveal 0.82s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--hero-delay, 0ms);
+  }
+
+  .hero-tag {
+    animation: hero-tag-reveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--hero-delay, 0ms);
+  }
+
+  .hero-rule {
+    animation: hero-rule-reveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .hero-rule-bottom {
+    animation-delay: 0.42s;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-parallax-layer {
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [data-parallax-active='true'] .hero-parallax-layer {
+    transition-duration: 90ms;
+    transition-timing-function: linear;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  [data-motion-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    will-change: auto;
+  }
+
   *,
   *::before,
   *::after {

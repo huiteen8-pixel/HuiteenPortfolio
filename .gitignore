@@ -9,6 +9,8 @@ dist/
 # Environment
 .env
 .env.local
+.env.*
+!.env.example
 .env.*.local
 
 # IDE
@@ -27,6 +29,9 @@ coverage/
 # Misc
 .DS_Store
 *.pem
+*.key
+*.p12
+*.pfx
 
 # Debug
 npm-debug.log*
@@ -41,8 +46,14 @@ yarn-error.log*
 next-env.d.ts
 
 # SQLite runtime files
+data/*.db
 data/*.db-wal
 data/*.db-shm
+data/*.db-journal
+data/*.sqlite*
+
+# Local production deployment audit records
+deploy/manifests/*.txt
 
 # Folders to ignore
 REFERENCE/
