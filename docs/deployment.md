@@ -1,13 +1,15 @@
 # 构建与部署
 
-本项目是带 Route Handlers 和 SQLite 的 Next.js Node 应用，不是纯静态导出。推荐架构是：
+> **当前 `huiteen.com` 生产环境采用下文的 Docker Compose + Caddy 架构。** 根目录 `deploy.sh` 及本文后半部分的 standalone/systemd/Nginx 内容是未启用的替代方案，不得在当前服务器或当前 Docker 检出目录上混用。协作者请以 [`collaborator-guide.md`](collaborator-guide.md) 为准。
+
+本项目是带 Route Handlers 和 SQLite 的 Next.js Node 应用，不是纯静态导出。可选的 standalone 架构是：
 
 ```text
 Browser ── HTTPS ──> Nginx ── HTTP/localhost ──> Next.js standalone
                                                        └──> SQLite persistent volume
 ```
 
-## 与现有 Caddy 服务同机部署
+## 当前生产：Docker Compose + Caddy
 
 仓库根目录的 `Dockerfile` 与 `compose.portfolio.yml` 用于把作品集作为独立
 Compose 项目运行。该方式适合目标服务器已经由另一套 Caddy 占用公网
@@ -49,6 +51,8 @@ Caddy 的第二网络还需写入入口服务的声明式配置；单独执行
 
 ## 部署脚本
 
+> 本节是 standalone/systemd 替代方案，不适用于当前 Docker/Caddy 生产环境。
+
 根目录的 `deploy.sh` 会先执行 lint、类型检查和生产构建，然后组装 standalone 服务器、`.next/static` 和 `public`。它使用现有 SSH key/agent 认证，不接收或保存 SSH 密码。每次部署会创建唯一的 `releases/<release-id>`，在本地和上传后两次检查 `.env*` 与 SQLite 产物，然后用软链接原子切换 `current`；它不会覆盖已上线的 release 或持久化数据。
 
 推荐配置（包含服务重启和健康检查）：
@@ -56,7 +60,7 @@ Caddy 的第二网络还需写入入口服务的声明式配置；单独执行
 ```bash
 DEPLOY_SERVER=deploy@server.example.com \
 DEPLOY_ALLOWED_BASE=/srv \
-DEPLOY_TARGET_DIR=/srv/huiteen-portfolio \
+DEPLOY_TARGET_DIR=/srv/huiteen-portfolio-standalone-example \
 DEPLOY_RESTART_COMMAND='sudo systemctl restart huiteen-portfolio' \
 DEPLOY_HEALTHCHECK_URL=https://huiteen.com \
 ./deploy.sh
@@ -81,7 +85,7 @@ libc 家族相同仍不保证任意发行版版本都具备向后兼容性。最
 建议在与目标服务器架构、libc 和 Node 版本一致的 WSL 或 Linux 容器中运行，不要从 PowerShell 的 Windows Node.js 直接构建。先在 WSL 安装 Linux 版 Node.js、pnpm、OpenSSH、rsync 和 curl，并清理任何由 Windows Node.js 生成的 `node_modules`，然后从 PowerShell 调用：
 
 ```powershell
-wsl -- bash -lc 'cd "/mnt/c/path/to/HuiteenPortfolio" && DEPLOY_SERVER=deploy@server.example.com DEPLOY_TARGET_DIR=/srv/huiteen-portfolio DEPLOY_RESTART_COMMAND="sudo systemctl restart huiteen-portfolio" DEPLOY_HEALTHCHECK_URL=https://huiteen.com ./deploy.sh'
+wsl -- bash -lc 'cd "/mnt/c/path/to/HuiteenPortfolio" && DEPLOY_SERVER=deploy@server.example.com DEPLOY_TARGET_DIR=/srv/huiteen-portfolio-standalone-example DEPLOY_RESTART_COMMAND="sudo systemctl restart huiteen-portfolio" DEPLOY_HEALTHCHECK_URL=https://huiteen.com ./deploy.sh'
 ```
 
 将 `/mnt/c/path/to/HuiteenPortfolio` 替换为仓库的 WSL 路径。WSL 通常是 x86_64/glibc，若生产机是 arm64 或 musl（例如 Alpine），应改用匹配目标的 CI/container。若 SSH key 位于 Windows 而未导入 WSL，需要先在 WSL 内配置 key/agent；脚本不会提示输入或保存密码。
@@ -98,9 +102,9 @@ wsl -- bash -lc 'cd "/mnt/c/path/to/HuiteenPortfolio" && DEPLOY_SERVER=deploy@se
 以下路径只是示例，请根据服务器修改：
 
 ```text
-/srv/huiteen-portfolio/releases/<release-id>/    # 不可变的发布产物
-/srv/huiteen-portfolio/current -> releases/...   # 当前版本软链接
-/srv/huiteen-portfolio/previous -> releases/...  # 最近一次切换前的版本
+/srv/huiteen-portfolio-standalone-example/releases/<release-id>/    # 不可变的发布产物
+/srv/huiteen-portfolio-standalone-example/current -> releases/...   # 当前版本软链接
+/srv/huiteen-portfolio-standalone-example/previous -> releases/...  # 最近一次切换前的版本
 /var/lib/huiteen-portfolio/analytics.db          # 持久化数据
 /etc/huiteen-portfolio.env                       # 仅运行账户可读的秘密
 ```
@@ -201,7 +205,7 @@ After=network.target
 Type=simple
 User=huiteen
 Group=huiteen
-WorkingDirectory=/srv/huiteen-portfolio/current
+WorkingDirectory=/srv/huiteen-portfolio-standalone-example/current
 EnvironmentFile=/etc/huiteen-portfolio.env
 ExecStart=/usr/bin/node server.js
 Restart=on-failure
@@ -301,7 +305,7 @@ server {
 脚本会在每次切换前将旧的 `current` 记录为 `previous`。若重启命令或健康检查失败，它会自动执行相当于以下操作的原子回滚并再次重启服务：
 
 ```bash
-cd /srv/huiteen-portfolio
+cd /srv/huiteen-portfolio-standalone-example
 ln -s "$(readlink previous)" .current-manual
 mv -Tf .current-manual current
 sudo systemctl restart huiteen-portfolio

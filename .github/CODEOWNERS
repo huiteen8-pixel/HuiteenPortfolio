@@ -1,0 +1,3 @@
+# Require the repository owner to review every production-bound change.
+* @huiteen8-pixel
+/.github/CODEOWNERS @huiteen8-pixel
