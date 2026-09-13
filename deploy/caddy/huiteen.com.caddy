@@ -25,7 +25,7 @@ huiteen.com {
 	header @next_static Cache-Control "public, max-age=31536000, immutable"
 
 	@analytics path /analytics /analytics/* /api/analytics/*
-	header @analytics Cache-Control "no-store"
+	header @analytics >Cache-Control "no-store"
 
 	reverse_proxy huiteen-portfolio:3000 {
 		header_up Host {host}
