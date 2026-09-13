@@ -412,20 +412,19 @@ const capabilityHighlights = [
   },
 ];
 
-const heroTags = ['Interaction Design', 'Service Design', 'Product Prototype', 'AIGC Workflow'];
-
 export default function Portfolio() {
   return (
-    <main className="min-h-screen bg-white text-[#151515]">
+    <main className="portfolio-page min-h-screen bg-white text-[#151515]">
       <TrackerProvider />
       <PortfolioNavigation
         navigation={navigation}
         projects={projects.map(({ id, index, title }) => ({ id, index, title }))}
       />
-      <HeroSection tags={heroTags} />
+      <div className="home-gradient-shell">
+      <HeroSection />
 
-      <section id="profile" className="relative scroll-mt-24 px-4 py-24 sm:px-6 md:px-8 md:py-44">
-        <div className="mx-auto max-w-[1200px]">
+        <section id="profile" className="relative scroll-mt-24 px-4 pb-24 pt-[55svh] sm:px-6 md:px-8 md:pb-44 md:pt-[58svh]">
+        <div className="mx-auto w-full max-w-[1600px]">
           <ScrollReveal>
             <div className="grid gap-12 md:grid-cols-[0.9fr_1.1fr] md:items-center">
               <div className="overflow-hidden rounded-[8px] border border-[#d7d0c7] bg-[#f8f5ef] shadow-[0_24px_70px_rgba(24,20,16,0.08)]">
@@ -449,7 +448,7 @@ export default function Portfolio() {
                   </motion.div>
                 </div>
               </div>
-              <div className="max-w-3xl space-y-7 self-center text-left text-base leading-8 text-[#444] md:text-lg md:leading-loose">
+              <div className="max-w-3xl space-y-7 self-center text-left text-base leading-8 text-white/80 md:text-lg md:leading-loose">
                 <p>
                   我擅长在不确定的需求中快速捕捉核心问题，并围绕用户场景、产品目标与使用路径，建立清晰的设计判断和推进方向。
                 </p>
@@ -555,9 +554,10 @@ export default function Portfolio() {
           </div>
         </div>
       </section>
+      </div>
 
       <section id="skills" className="scroll-mt-24 px-6 py-32 md:px-8 md:py-44">
-        <div className="mx-auto max-w-[1200px]">
+        <div className="mx-auto w-full max-w-[1600px]">
           <SectionHeader
             eyebrow="Methods"
             title="Methods"
@@ -590,10 +590,10 @@ export default function Portfolio() {
         </div>
       </section>
 
-      <DrawLine className="mx-auto max-w-[1200px] px-6 md:px-8" />
+      <DrawLine className="mx-auto max-w-[1600px] px-6 md:px-8" />
 
       <section id="projects" className="scroll-mt-24 px-4 py-24 sm:px-6 md:px-8 md:py-44">
-        <div className="mx-auto max-w-[1400px]">
+        <div className="mx-auto w-full max-w-[1680px]">
           <SectionHeader
             eyebrow="Selected Projects"
             title="Selected Projects"
@@ -625,7 +625,7 @@ export default function Portfolio() {
       </section>
 
       <section id="connect" className="scroll-mt-24 px-6 py-28 md:px-8 md:py-36">
-        <div className="mx-auto max-w-[1200px]">
+        <div className="mx-auto w-full max-w-[1600px]">
           <DrawLine className="mb-20" />
           <ScrollReveal>
             <div className="grid gap-12 md:grid-cols-[1fr_0.8fr] md:items-end">

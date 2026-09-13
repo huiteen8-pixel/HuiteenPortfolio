@@ -62,6 +62,52 @@ body {
   overflow-x: hidden;
 }
 
+.home-gradient-shell {
+  background:
+    radial-gradient(ellipse 72% 28% at 50% 18rem, rgba(255, 255, 255, 0.055), transparent 72%),
+    linear-gradient(
+      to bottom,
+      #030303 0,
+      #101010 20rem,
+      #383838 42rem,
+      #858585 68rem,
+      #d6d6d6 92rem,
+      #f7f7f7 116rem,
+      #ffffff 145rem
+    );
+}
+
+/* Fluid portfolio typography: keep mobile compact and let content scale with the viewport. */
+@media (min-width: 768px) {
+  .portfolio-page :is(#profile, #skills, #projects, #connect) .text-xs {
+    font-size: clamp(0.85rem, calc(0.68rem + 0.35vw), 1.08rem);
+  }
+
+  .portfolio-page :is(#profile, #skills, #projects, #connect) .text-sm {
+    font-size: clamp(1rem, calc(0.8rem + 0.45vw), 1.32rem);
+  }
+
+  .portfolio-page :is(#profile, #skills, #projects, #connect) .text-base {
+    font-size: clamp(1.18rem, calc(0.95rem + 0.5vw), 1.5rem);
+  }
+
+  .portfolio-page :is(#profile, #skills, #projects, #connect) .text-lg {
+    font-size: clamp(1.35rem, calc(1.1rem + 0.55vw), 1.75rem);
+  }
+
+  .portfolio-page :is(#profile, #skills, #projects, #connect) .text-xl {
+    font-size: clamp(1.55rem, calc(1.3rem + 0.6vw), 2rem);
+  }
+
+  .portfolio-page :is(#profile, #skills, #projects, #connect) .text-2xl {
+    font-size: clamp(1.85rem, calc(1.55rem + 0.7vw), 2.4rem);
+  }
+
+  .portfolio-page :is(#profile, #skills, #projects, #connect) .text-3xl {
+    font-size: clamp(2.2rem, calc(1.9rem + 0.75vw), 2.8rem);
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -130,6 +176,40 @@ img {
   }
 }
 
+@keyframes hero-logo-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.975);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes hero-subtitle-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes hero-scroll-cue {
+  0%,
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  50% {
+    transform: translate3d(-50%, 6px, 0);
+  }
+}
+
 .hero-rule-top {
   transform-origin: left center;
 }
@@ -139,6 +219,18 @@ img {
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .hero-logo-enter {
+    animation: hero-logo-enter 1.05s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .hero-subtitle-enter {
+    animation: hero-subtitle-enter 0.72s 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .hero-scroll-cue {
+    animation: hero-scroll-cue 2s ease-in-out infinite;
+  }
+
   .hero-reveal {
     animation: hero-reveal 0.82s cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: var(--hero-delay, 0ms);
@@ -155,6 +247,23 @@ img {
 
   .hero-rule-bottom {
     animation-delay: 0.42s;
+  }
+}
+
+@media (max-width: 767px) {
+  .home-gradient-shell {
+    background:
+      radial-gradient(ellipse 90% 24% at 50% 13rem, rgba(255, 255, 255, 0.06), transparent 72%),
+      linear-gradient(
+        to bottom,
+        #030303 0,
+        #111111 15rem,
+        #424242 34rem,
+        #969696 53rem,
+        #dedede 70rem,
+        #fafafa 88rem,
+        #ffffff 108rem
+      );
   }
 }
 

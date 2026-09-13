@@ -11,7 +11,7 @@ ENV PNPM_HOME=/pnpm \
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+RUN corepack enable && corepack prepare pnpm@11.19.0 --activate
 
 
 FROM base AS dependencies
