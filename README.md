@@ -4,9 +4,9 @@
 
 线上站点：[https://huiteen.com](https://huiteen.com)
 
-新协作者从其他电脑参与开发、提交代码和发布生产版本时，请先阅读
+仓库所有者在新电脑接管维护，或未来有新协作者参与开发和发布时，请先阅读
 [`docs/collaborator-guide.md`](docs/collaborator-guide.md)。手册包含独立 SSH
-密钥、Pull Request、受限服务器权限、发布验收与回滚要求。
+密钥、单人维护的 Pull Request 规则、受限服务器权限、发布验收与回滚要求。
 
 ## 技术栈
 
@@ -78,7 +78,7 @@ docs/                          # 部署与作品内容维护文档
 
 ## 构建与部署
 
-这是需要 Node.js 运行时的 Next.js 应用，不是纯静态站点。当前 `huiteen.com` 使用 `compose.portfolio.yml` 运行独立应用容器，Caddy 通过 `huiteen-portfolio-edge` 网络反向代理，SQLite 保存在独立持久化卷中。协作者只能按照 [`docs/collaborator-guide.md`](docs/collaborator-guide.md) 的受限流程发布。
+这是需要 Node.js 运行时的 Next.js 应用，不是纯静态站点。当前 `huiteen.com` 使用 `compose.portfolio.yml` 运行独立应用容器，Caddy 通过 `huiteen-portfolio-edge` 网络反向代理，SQLite 保存在独立持久化卷中。维护者只能按照 [`docs/collaborator-guide.md`](docs/collaborator-guide.md) 的受限流程发布。
 
 [`docs/deployment.md`](docs/deployment.md) 同时保留当前 Docker/Caddy 架构和一套可选的 standalone/systemd 架构。根目录 `deploy.sh` 只服务于后者，**不适用于当前生产服务器，也不得把当前生产检出目录作为它的目标目录**。
 
