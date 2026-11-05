@@ -1,8 +1,21 @@
 'use client';
 
 import Image from 'next/image';
+import { useEffect, useId, useState } from 'react';
+
+import letterOutlines from './hero/wordmark-paths.json';
 
 export default function HeroSection() {
+  const [wordmarkReady, setWordmarkReady] = useState(false);
+  const wordmarkMaskId = useId();
+
+  useEffect(() => {
+    const artwork = new window.Image();
+    artwork.onload = () => setWordmarkReady(true);
+    artwork.src = '/hero/title.png';
+    return () => { artwork.onload = null; };
+  }, []);
+
   return (
     <section
       id="about"
@@ -34,16 +47,20 @@ export default function HeroSection() {
           Huiteen — The undefined designer
         </h1>
 
-        <div className="hero-logo-enter relative w-[min(92vw,760px)] md:w-[min(74vw,1400px)]">
-          <Image
-            src="/hero/title.png"
-            alt="Huiteen"
-            width={3980}
-            height={1329}
-            sizes="(min-width: 768px) 74vw, 92vw"
-            className="h-auto w-full select-none"
-            priority
-          />
+        <div className={`hero-wordmark relative w-[min(92vw,760px)] md:w-[min(74vw,1400px)] ${wordmarkReady ? 'hero-wordmark-ready' : ''}`}>
+          <svg className="block h-auto w-full" viewBox="0 0 3980 1329" role="img" aria-label="Huiteen">
+            <defs>
+              <mask id={wordmarkMaskId} maskUnits="userSpaceOnUse" x="0" y="0" width="3980" height="1329" style={{ maskType: 'luminance' }}>
+                <g className="hero-wordmark-traces" fill="none" stroke="white" strokeWidth="150" strokeLinecap="round" strokeLinejoin="round">
+                  {letterOutlines.map((d, index) => (
+                    <path key={index} d={d} pathLength="1" style={{ animationDelay: `${index * 0.14}s` }} />
+                  ))}
+                </g>
+                <rect className="hero-wordmark-complete" width="3980" height="1329" fill="white" />
+              </mask>
+            </defs>
+            <image href="/hero/title.png" width="3980" height="1329" mask={`url(#${wordmarkMaskId})`} />
+          </svg>
         </div>
 
         <div className="hero-subtitle-enter mt-2 flex items-center justify-center gap-[0.45em] font-mono text-[clamp(1.15rem,2.7vw,3.25rem)] font-light tracking-[-0.045em] text-white/90 md:mt-1">

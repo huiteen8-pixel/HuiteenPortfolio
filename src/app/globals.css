@@ -294,3 +294,28 @@ img {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Reveal the original artwork along centerlines traced from its own pixels.
+   The final frame uses the same image; only the mask changes. */
+.hero-wordmark-complete { opacity: 1; }
+@keyframes wordmark-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes wordmark-complete {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-wordmark-complete { opacity: 0; }
+  .hero-wordmark-traces path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .hero-wordmark-ready .hero-wordmark-traces path {
+    animation: wordmark-draw 1.9s cubic-bezier(0.33, 0, 0.2, 1) both;
+  }
+  .hero-wordmark-ready .hero-wordmark-complete {
+    animation: wordmark-complete 0.7s 2.7s ease-out both;
+  }
+}
