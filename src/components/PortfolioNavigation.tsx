@@ -47,7 +47,9 @@ export default function PortfolioNavigation({ navigation, projects }: PortfolioN
     const updateScrollState = () => {
       animationFrameId = null;
       const scrollTop = window.scrollY;
-      const nextScrolled = scrollTop > 100;
+      const opening = document.getElementById('about');
+      const openingExit = opening ? opening.offsetTop + opening.offsetHeight - window.innerHeight : 100;
+      const nextScrolled = scrollTop > Math.max(100, openingExit);
       setScrolled((current) => (current === nextScrolled ? current : nextScrolled));
 
       const readingLine = scrollTop + Math.min(window.innerHeight * 0.36, 300);

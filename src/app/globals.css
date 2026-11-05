@@ -63,18 +63,16 @@ body {
 }
 
 .home-gradient-shell {
-  background:
+  --hero-pin-distance: 220svh;
+  --hero-background-offset: 0px;
+  background-color: #fff;
+  background-image:
     radial-gradient(ellipse 72% 28% at 50% 18rem, rgba(255, 255, 255, 0.055), transparent 72%),
-    linear-gradient(
-      to bottom,
-      #030303 0,
-      #101010 20rem,
-      #383838 42rem,
-      #858585 68rem,
-      #d6d6d6 92rem,
-      #f7f7f7 116rem,
-      #ffffff 145rem
-    );
+    linear-gradient(to bottom, #030303 0, #101010 20rem, #383838 42rem,
+      #858585 68rem, #d6d6d6 92rem, #f7f7f7 116rem, #fff 145rem);
+  background-size: 100% 145rem;
+  background-position: center var(--hero-background-offset);
+  background-repeat: no-repeat;
 }
 
 /* Fluid portfolio typography: keep mobile compact and let content scale with the viewport. */
@@ -316,6 +314,50 @@ img {
     animation: wordmark-draw 1.9s cubic-bezier(0.33, 0, 0.2, 1) both;
   }
   .hero-wordmark-ready .hero-wordmark-complete {
-    animation: wordmark-complete 0.7s 2.7s ease-out both;
+    animation: wordmark-complete 0.7s 3.5s ease-out both;
+  }
+}
+
+/* Native scrolling advances the handwriting while the entire opening stays pinned. */
+.hero-scroll-scene { height: calc(100svh + var(--hero-pin-distance, 220svh)); }
+/* The pinned opening and following content share the same gradient canvas. */
+.hero-pinned { background: transparent; }
+.hero-wordmark svg { mix-blend-mode: screen; opacity: .92; }
+.hero-note { height: auto; overflow: visible; }
+@media (max-width: 767px) {
+  .hero-pinned { padding-top: 80px; }
+  .hero-center {
+    position: absolute;
+    left: 0;
+    top: 34svh;
+    padding-top: 0;
+  }
+  .hero-handwriting .hero-note-portfolio { left: 8% !important; top: 17% !important; width: 76% !important; }
+  .hero-handwriting .hero-note-imperfect { left: 64% !important; top: 27% !important; width: 31% !important; }
+  .hero-handwriting .hero-note-but { left: 66% !important; top: 31% !important; width: 15% !important; }
+  .hero-handwriting .hero-note-casual { left: 70% !important; top: 34% !important; width: 27% !important; }
+  .hero-handwriting .hero-note-show { left: 4% !important; top: 70% !important; width: 37% !important; }
+  .hero-handwriting .hero-note-iam { left: 13% !important; top: 79% !important; width: 32% !important; }
+  .hero-handwriting .hero-note-ideas { left: 56% !important; top: 71% !important; width: 28% !important; }
+  .hero-handwriting .hero-note-aesthetic { left: 56% !important; top: 77% !important; width: 37% !important; }
+  .hero-handwriting .hero-note-allround { left: 56% !important; top: 83% !important; width: 40% !important; }
+  .hero-handwriting .hero-note-star-left { left: 7% !important; top: 30% !important; width: 5% !important; }
+  .hero-handwriting .hero-note-star-right { left: 91% !important; top: 57% !important; width: 5% !important; }
+  .hero-handwriting .hero-note-star-bottom { left: 46% !important; top: 66% !important; width: 5% !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-gradient-shell { --hero-pin-distance: 0svh; }
+  .hero-scroll-scene { height: auto; }
+  .hero-pinned { position: relative; }
+}
+
+@keyframes wordmark-point-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-wordmark-point { opacity: 0; }
+  .hero-wordmark-ready .hero-wordmark-point {
+    animation: wordmark-point-enter .22s ease-out both;
   }
 }
