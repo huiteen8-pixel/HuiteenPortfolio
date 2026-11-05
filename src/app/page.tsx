@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import HeroSection from '@/components/HeroSection';
+import ProfileIntro from '@/components/ProfileIntro';
 import ImageGallery from '@/components/ImageGallery';
 import PortfolioNavigation from '@/components/PortfolioNavigation';
 import ScrollReveal, { DrawLine } from '@/components/ScrollReveal';
@@ -423,43 +424,10 @@ export default function Portfolio() {
       <div className="home-gradient-shell">
       <HeroSection />
 
-        <section id="profile" className="relative scroll-mt-24 px-4 pb-24 pt-[55svh] sm:px-6 md:px-8 md:pb-44 md:pt-[58svh]">
+        <section id="profile" className="profile-section relative scroll-mt-24 px-4 pb-24 sm:px-6 md:px-8 md:pb-44">
         <div className="mx-auto w-full max-w-[1600px]">
           <ScrollReveal>
-            <div className="grid gap-12 md:grid-cols-[0.9fr_1.1fr] md:items-center">
-              <div className="overflow-hidden rounded-[8px] border border-[#d7d0c7] bg-[#f8f5ef] shadow-[0_24px_70px_rgba(24,20,16,0.08)]">
-                <div className="relative aspect-[4/5] bg-[#eee9e2]">
-                  <motion.div
-                    className="absolute inset-0"
-                    initial={{ scale: 1.03 }}
-                    whileInView={{ scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    <Image
-                      src="/profile/huiteen-portrait.jpg"
-                      alt="Huiteen portrait"
-                      fill
-                      sizes="(min-width: 768px) 42vw, 100vw"
-                      className="object-cover object-[62%_50%]"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </motion.div>
-                </div>
-              </div>
-              <div className="max-w-3xl space-y-7 self-center text-left text-base leading-8 text-white/80 md:text-lg md:leading-loose">
-                <p>
-                  我擅长在不确定的需求中快速捕捉核心问题，并围绕用户场景、产品目标与使用路径，建立清晰的设计判断和推进方向。
-                </p>
-                <p>
-                  在项目执行中，我能够将抽象概念转化为具体的产品结构，完成从功能拆解、流程规划、交互原型到视觉界面的完整设计过程。
-                </p>
-                <p>
-                  我关注 AI 工具在灵感发散、视觉探索、原型生成和方案迭代中的应用，也在探索 AIGC 与 Naive Design、Kid Core 等人文感视觉语言的结合。
-                </p>
-              </div>
-            </div>
+            <ProfileIntro />
           </ScrollReveal>
 
           <ScrollReveal delay={0.08}>
