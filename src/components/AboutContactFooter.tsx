@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 
 const EMAIL = '2759693844@qq.com';
 
-export default function AboutContactFooter() {
+export default function AboutContactFooter({ variant = 'default' }: { variant?: 'default' | 'home' }) {
   const [message, setMessage] = useState('');
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -23,13 +23,13 @@ export default function AboutContactFooter() {
   }
 
   return (
-    <footer id="about-contact-footer" className="about-contact-footer" aria-label="联系 Huiteen">
+    <footer id={variant === 'home' ? 'home-contact-footer' : 'about-contact-footer'} className={`about-contact-footer ${variant === 'home' ? 'home-closing-contact' : ''}`} aria-label="联系 Huiteen">
       <Link className="about-contact-home" href="/">Huiteen</Link>
       <div className="about-contact-email">
         <button type="button" onClick={copyEmail} aria-label={`复制邮箱 ${EMAIL}`}>{EMAIL}</button>
         <span className="about-contact-status" role="status">{message}</span>
       </div>
-      <a href="https://www.xiaohongshu.com/user/profile/67ca4837000000000a03cbb2" target="_blank" rel="noopener noreferrer">Hui 小红书</a>
+      {variant === 'default' && <a href="https://www.xiaohongshu.com/user/profile/67ca4837000000000a03cbb2" target="_blank" rel="noopener noreferrer">Hui 小红书</a>}
     </footer>
   );
 }

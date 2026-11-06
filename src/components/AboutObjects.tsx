@@ -14,10 +14,10 @@ const bounds = (x: number, y: number, width: number, height: number): CSSPropert
 });
 
 const notes = {
-  macbook: { file: 'macbook-note.png?v=11af1907d009', text: '负责把“随便做做”保存成“最终版_07”', x: 140, y: 337, width: 277, height: 92 },
-  camera: { file: 'camera-note.png?v=09f94fc29209', text: '瞬间往往更值得回味', x: 900, y: 140, width: 285, height: 95 },
-  ipad: { file: 'ipad-note.png?v=65523e821d1f', text: '草图也不会丢垃圾桶', x: 1090, y: 606, width: 305, height: 109 },
-  writing: { file: 'writing-note.png?v=b56623e49cf1', text: '书教我成为作家，笔等我写完了第一句', x: 358, y: 597, width: 305, height: 107 },
+  macbook: { file: 'macbook-note.png?v=49aa61472fc8', text: '负责把“随便做做”保存成“最终版_07”', x: 140, y: 337, width: 277, height: 92 },
+  camera: { file: 'camera-note.png?v=431048ef3b2d', text: '瞬间往往更值得回味', x: 900, y: 140, width: 285, height: 95 },
+  ipad: { file: 'ipad-note.png?v=710df7f8b38d', text: '草图也不会丢垃圾桶', x: 1090, y: 606, width: 305, height: 109 },
+  writing: { file: 'writing-note.png?v=7367ceef1c63', text: '书教我成为作家，笔等我写完了第一句', x: 358, y: 597, width: 305, height: 107 },
 } as const;
 type NoteName = keyof typeof notes;
 
