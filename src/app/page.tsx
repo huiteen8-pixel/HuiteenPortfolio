@@ -59,7 +59,6 @@ const visual = (
 const navigation = [
   { label: 'about', id: 'about' },
   { label: 'profile', id: 'profile' },
-  { label: 'methods', id: 'skills' },
   { label: 'projects', id: 'projects' },
   { label: 'approach', id: 'connect' },
 ];
@@ -383,40 +382,11 @@ const projects: Project[] = [
   },
 ];
 
-const skillGroups = [
-  {
-    title: 'Research & Strategy',
-    items: ['需求识别', '设计研究与定义', '用户场景拆解', '产品目标判断', '方案推进方向'],
-  },
-  {
-    title: 'Product Structure',
-    items: ['功能拆解', '流程规划', '信息架构', '系统设计', '服务与产品开发'],
-  },
-  {
-    title: 'Prototype & Tools',
-    items: ['Figma', 'Cursor', 'Codex', 'AE', 'AI 工具', 'Sketch'],
-  },
-  {
-    title: 'Exploration',
-    items: ['AIGC 工作流', '视觉探索', '高质量可演示原型', 'Naive Design', 'Kid Core'],
-  },
-];
-
-const capabilityHighlights = [
-  {
-    title: 'Focus',
-    lines: ['产品服务与开发', '设计研究与定义', '数据可视化 / 系统设计'],
-  },
-  {
-    title: 'What I Can Do',
-    lines: ['需求识别与功能拆解', '流程规划与交互原型', '视觉界面与可演示网页原型'],
-  },
-];
-
 export default function Portfolio() {
   return (
     <main className="portfolio-page min-h-screen bg-white text-[#151515]">
       <TrackerProvider />
+      <a href="/about" className="floating-about-link" aria-label="About Huiteen">About Huiteen</a>
       <PortfolioNavigation
         navigation={navigation}
         projects={projects.map(({ id, index, title }) => ({ id, index, title }))}
@@ -430,131 +400,6 @@ export default function Portfolio() {
             <ProfileIntro />
           </ScrollReveal>
 
-          <ScrollReveal delay={0.08}>
-            <div className="mt-20 md:mt-28">
-              <h2
-                className="text-[3.6rem] font-semibold leading-none tracking-[-0.04em] text-[#171412] md:text-[7.5rem]"
-                style={{ fontFamily: 'Noto Serif SC, Georgia, serif' }}
-              >
-                Education Background
-              </h2>
-
-              <div className="mt-10 border-t border-[#ded8d0] pt-10 md:mt-16 md:pt-14">
-                <div className="grid gap-12 md:grid-cols-[0.24fr_0.76fr]">
-                  <div className="text-left">
-                    <p className="text-sm uppercase tracking-[0.22em] text-[#706a65]">2024.9 - 2028.6</p>
-                    <h3 className="mt-6 text-3xl font-semibold tracking-[-0.02em] text-[#171412]">
-                      广州美术学院
-                    </h3>
-                    <motion.div
-                      className="relative mt-8 h-24 w-24"
-                      initial={{ opacity: 0, y: 8 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                      <Image
-                        src="/profile/gafa-emblem.png"
-                        alt="广州美术学院校徽"
-                        fill
-                        sizes="96px"
-                        className="object-contain"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </motion.div>
-                  </div>
-
-                  <div className="text-left">
-                    <h3 className="text-3xl font-semibold leading-snug tracking-[-0.02em] text-[#171412]">
-                      湾区创新学院 · 艺术与科技专业 · 本科
-                    </h3>
-
-                    <div className="mt-12 space-y-10 text-base leading-8 text-[#4d463f] md:text-lg">
-                      <div>
-                        <p className="mb-4 text-sm uppercase tracking-[0.18em] text-[#706a65]">主修课程</p>
-                        <p>产品服务与开发、设计研究与定义、数据可视化、系统设计</p>
-                      </div>
-
-                      <div>
-                        <p className="mb-4 text-sm uppercase tracking-[0.18em] text-[#706a65]">个人成绩</p>
-                        <p>
-                          学院排名前 <span className="font-semibold text-[#171412]">1%</span>
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="mb-4 text-sm uppercase tracking-[0.18em] text-[#706a65]">所获荣誉</p>
-                        <div className="flex flex-wrap gap-3">
-                          {['校级奖学金', '校优秀学生', '创新创业'].map((item) => (
-                            <span
-                              key={item}
-                              className="rounded-full bg-[#f4f1ed] px-5 py-2 text-base text-[#4d463f]"
-                            >
-                              {item}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          <div className="mt-16 grid gap-5 md:mt-20 md:grid-cols-2">
-            {capabilityHighlights.map((item, index) => (
-              <ScrollReveal key={item.title} delay={index * 0.08}>
-                <div className="h-full border-t border-[#ded8d0] pt-5 text-left">
-                  <p className="text-xs uppercase tracking-[0.18em] text-[#706a65]">
-                    {String(index + 1).padStart(2, '0')}
-                  </p>
-                  <h3 className="mt-5 text-2xl font-semibold text-[#171412]">{item.title}</h3>
-                  <div className="mt-5 space-y-3 text-base leading-7 text-[#4d463f]">
-                    {item.lines.map((line) => (
-                      <p key={line}>{line}</p>
-                    ))}
-                  </div>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-      </div>
-
-      <section id="skills" className="scroll-mt-24 px-6 py-32 md:px-8 md:py-44">
-        <div className="mx-auto w-full max-w-[1600px]">
-          <SectionHeader
-            eyebrow="Methods"
-            title="Methods"
-            description="能力结构围绕需求识别、产品结构、原型工具和 AIGC 探索展开，强调从模糊想法到可验证方案的完整推进能力。"
-            hideEyebrow
-          />
-
-          <div className="mt-20 grid gap-x-12 gap-y-16 md:grid-cols-2">
-            {skillGroups.map((group, index) => (
-              <ScrollReveal key={group.title} delay={index * 0.06}>
-                <div>
-                  <div className="mb-6 flex items-center gap-5">
-                    <span className="text-sm text-[#706a65]">0{index + 1}</span>
-                    <h3 className="text-3xl font-semibold tracking-[-0.03em]">{group.title}</h3>
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    {group.items.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-full border border-[#e5e5e5] px-4 py-2 text-sm text-[#444]"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -618,6 +463,7 @@ export default function Portfolio() {
           </ScrollReveal>
         </div>
       </section>
+      </div>
     </main>
   );
 }

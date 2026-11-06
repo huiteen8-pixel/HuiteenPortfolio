@@ -397,3 +397,228 @@ img {
 
 /* Keep the introduction directly below the opening, inside the shared gradient. */
 .profile-section { padding-top: clamp(1.5rem, 6svh, 4.5rem); }
+
+.floating-about-link {
+  position: fixed;
+  left: clamp(1rem, 2.2vw, 2.75rem);
+  bottom: max(1.5rem, env(safe-area-inset-bottom));
+  z-index: 45;
+  padding: .2em .1em;
+  color: #fff;
+  mix-blend-mode: difference;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(1.5rem, 2.6vw, 3rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.065em;
+  text-decoration: none;
+}
+.floating-about-link:hover { text-decoration: underline; text-underline-offset: .15em; }
+.floating-about-link:focus-visible { outline: 2px solid; outline-offset: 6px; }
+
+/* About: the supplied 1409 × 5004 reference is the layout coordinate system. */
+.about-reference-page {
+  min-height: 100svh;
+  background: #080808;
+  color: #f8f8f8;
+  font-family: 'Helvetica Neue', 'PingFang SC', Arial, sans-serif;
+}
+.about-floating-nav {
+  position: fixed;
+  z-index: 55;
+  top: max(22px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  width: min(540px, calc(100vw - 40px));
+  font-family: 'Arial Narrow', 'SFMono-Regular', Consolas, monospace;
+  font-size: clamp(15px, 2vw, 25px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: .07em;
+}
+.about-floating-nav a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+  height: clamp(48px, 6vw, 71px);
+  border-radius: 34px 17px 17px 34px;
+  background: #111516;
+  color: #e5e8e9;
+  text-decoration: none;
+  transition: background .2s, color .2s;
+}
+.about-floating-nav a:nth-child(2) { border-radius: 17px; }
+.about-floating-nav a:last-child { border-radius: 17px 34px 34px 17px; background: #0d1112; color: #838d92; }
+.about-floating-nav a[aria-current='page'] { background: #111516; color: #e5e8e9; }
+.about-floating-nav a:hover { background: #202729; color: #fff; }
+.about-floating-nav a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.contact-empty-page { min-height: 100svh; background: #080808; }
+.about-reference-canvas {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1409 / 5004;
+  container-type: inline-size;
+}
+.about-reference-asset { position: absolute; display: block; object-fit: fill; }
+.about-tape-proximity { aspect-ratio: 608 / 434; }
+.about-tape-proximity svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.about-reference-education,
+.about-reference-capabilities,
+.about-reference-belief { position: absolute; }
+.about-reference-education { font-weight: 200; }
+.about-reference-name { position: absolute; inset: 0 auto auto 0; font-size: 2.555cqw; line-height: 3.4067cqw; font-weight: 600; white-space: nowrap; }
+.about-reference-education h2 { position: absolute; top: 4.9681cqw; left: 0; font-size: 2.555cqw; line-height: 3.5486cqw; font-weight: 400; white-space: nowrap; }
+.about-reference-school { position: absolute; top: 10.3617cqw; left: 0; display: flex; align-items: center; gap: 1.3485cqw; white-space: nowrap; font-size: 2.555cqw; line-height: 3.4067cqw; }
+.about-reference-school svg { width: 5.9617cqw; height: 5.9617cqw; flex: none; }
+.about-reference-faculty { position: absolute; top: 17.3172cqw; left: 0; font-size: 2.555cqw; line-height: 3.4067cqw; white-space: nowrap; }
+.about-reference-awards { position: absolute; top: 19.0206cqw; left: -1.3485cqw; width: 30.2342cqw; height: 10.149cqw; }
+.about-reference-capabilities { display: grid; grid-template-columns: minmax(0, 388fr) minmax(0, 388fr) minmax(0, 375fr); gap: 4.7551cqw; text-align: center; }
+.about-reference-capabilities h2 { font-size: 4.2583cqw; font-weight: 400; line-height: 5.11cqw; font-family: Arial, sans-serif; text-align: left; letter-spacing: 0; white-space: nowrap; }
+.about-reference-capabilities p { margin-top: 1.4194cqw; font-size: 1.7033cqw; font-weight: 200; line-height: 2.3421cqw; letter-spacing: -.035em; }
+.about-reference-capabilities article:nth-child(1) h2 { transform: translateX(.4258cqw); }
+.about-reference-capabilities article:nth-child(2) h2 { transform: translateX(2.484cqw); }
+.about-reference-capabilities article:nth-child(3) h2 { transform: translateX(-.2129cqw); }
+.about-reference-capabilities p span { display: block; white-space: nowrap; }
+.about-reference-belief { text-align: center; font-weight: 200; }
+.about-reference-belief p:first-child { font-size: 2.555cqw; line-height: 3.5486cqw; letter-spacing: -.025em; }
+.about-reference-belief p:last-child { font-size: 1.7033cqw; line-height: 2.3421cqw; }
+.about-footer-wordmark img { display: block; width: 100%; height: 100%; }
+.about-keyboard-home { position: fixed; top: -100px; left: 1rem; z-index: 60; padding: .75rem 1rem; background: #fff; color: #080808; }
+.about-keyboard-home:focus-visible { top: 1rem; }
+.about-footer-wordmark:focus-visible { outline: 2px solid #fff; outline-offset: 8px; }
+
+.about-contact-footer {
+  position: absolute;
+  inset: auto 3% 1.1cqw 4%;
+  display: flex;
+  align-items: baseline;
+  gap: 4cqw;
+  font-family: 'Helvetica Neue', 'PingFang SC', Arial, sans-serif;
+  font-size: 2.7cqw;
+  font-weight: 400;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.about-contact-home { margin-right: auto; font-size: 3.4cqw; }
+.about-contact-email { position: relative; }
+.about-contact-email button { cursor: pointer; text-decoration: underline; text-underline-offset: .18em; }
+.about-contact-status { position: absolute; right: 0; bottom: calc(100% + .8rem); font-size: 14px; color: #ddd; }
+.about-contact-footer a:hover, .about-contact-email button:hover { opacity: .75; }
+.about-contact-footer a:focus-visible, .about-contact-email button:focus-visible { outline: 2px solid #fff; outline-offset: 6px; }
+@media (max-width: 767px) {
+  .about-reference-canvas:has(.about-contact-footer) { padding-bottom: 1.5rem; }
+  .about-contact-footer { position: relative; inset: auto; width: 92%; margin: 18vw auto 0; flex-wrap: wrap; justify-content: space-between; gap: 1.25rem; font-size: 18px; }
+  .about-contact-home { font-size: 26px; }
+  .about-contact-email { order: 1; width: 100%; text-align: center; }
+  .about-contact-status { left: 0; right: 0; }
+}
+
+@media (max-width: 767px) {
+  .about-reference-canvas { aspect-ratio: auto; min-height: 100svh; padding-block: 14vw 20vw; }
+  .about-reference-asset.about-tape-title { position: relative; left: auto !important; top: auto !important; width: 67% !important; height: auto !important; margin: 0 auto 16vw; }
+  .about-reference-asset.about-name-card { position: relative; left: auto !important; top: auto !important; width: 86% !important; height: auto !important; margin: 0 auto 20vw; }
+  .about-reference-education { position: relative; left: auto !important; top: auto !important; width: 86% !important; height: 270px !important; margin: auto; }
+  .about-reference-name { font-size: 24px; line-height: 34px; }
+  .about-reference-education h2 { top: 42px; font-size: clamp(22px, 5.8vw, 30px); line-height: 40px; }
+  .about-reference-school { top: 102px; font-size: 24px; line-height: 36px; gap: 14px; }
+  .about-reference-school svg { width: 56px; height: 56px; }
+  .about-reference-faculty { top: 174px; font-size: clamp(20px, 5.2vw, 28px); line-height: 36px; }
+  .about-reference-awards { top: 186px; left: -16px; width: 310px; height: 104px; }
+  .about-reference-objects { position: relative; top: auto; left: auto; width: 100%; height: auto; aspect-ratio: 1409 / 850; margin-top: 12vw; }
+  .about-reference-objects .about-reference-asset { top: auto !important; height: auto !important; }
+  .about-reference-objects .about-object-macbook { top: 0 !important; }
+  .about-reference-objects .about-object-camera { top: 2.59% !important; }
+  .about-reference-objects .about-object-ipad { top: 28.35% !important; }
+  .about-reference-objects .about-object-pencil { top: 45.88% !important; }
+  .about-reference-objects .about-object-book { top: 43.41% !important; }
+  .about-reference-capabilities { position: relative; left: auto !important; top: auto !important; width: 86% !important; height: auto !important; margin: 16vw auto 20vw; grid-template-columns: 1fr; gap: 3rem; }
+  .about-reference-capabilities h2 { font-size: 36px; line-height: 1.2; text-align: center; }
+  .about-reference-capabilities article:nth-child(n) h2 { transform: none; }
+  .about-reference-capabilities p { margin-top: 1.25rem; font-size: clamp(15px, 3.9vw, 22px); line-height: 1.65; }
+  .about-reference-capabilities p span { display: inline; white-space: normal; }
+  .about-reference-asset.about-daily-clock { position: relative; left: auto !important; top: auto !important; width: 96% !important; height: auto !important; margin: auto; }
+  .about-reference-belief { position: relative; left: auto !important; top: auto !important; width: 92% !important; height: auto !important; margin: 0 auto 18vw; }
+  .about-reference-belief p:first-child { font-size: clamp(19px, 4.7vw, 28px); line-height: 1.55; }
+  .about-reference-belief p:last-child { font-size: clamp(13px, 3.4vw, 19px); line-height: 1.7; }
+  .about-reference-asset.about-footer-wordmark { position: relative; left: auto !important; top: auto !important; width: 82% !important; height: auto !important; margin: auto; }
+}
+
+/* The flip card occupies exactly the original name-card rectangle. */
+.about-name-card { aspect-ratio: 795 / 471; }
+.about-name-card > .flip-card { position: absolute; inset: 0; }
+.flip-card {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.flip-card:active { cursor: grabbing; }
+.flip-card:focus-visible { outline: 2px solid #f5f5f5; outline-offset: 10px; border-radius: 22px; }
+.flip-card-tilt, .flip-card-rotor {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+.flip-card-face {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-card-face img { display: block; width: 100%; height: 100%; object-fit: fill; pointer-events: none; -webkit-user-drag: none; }
+.flip-card-glare { position: absolute; inset: 0; pointer-events: none; }
+.about-name-card .flip-card-glare { mask-size: 100% 100%; mask-repeat: no-repeat; }
+.about-name-card .flip-card-face-front .flip-card-glare { mask-image: url('/about/name-card.png'); }
+.about-name-card .flip-card-face-back .flip-card-glare { mask-image: url('/about/name-card-back.png'); }
+
+/* Stable hit areas let the objects move gently without interrupting hover. */
+#about-objects { scroll-margin-top: 10svh; }
+.about-reference-objects {
+  position: absolute;
+  left: 0;
+  top: 38.9089%;
+  width: 100%;
+  height: 16.9864%;
+  isolation: isolate;
+}
+
+.about-daily-clock { aspect-ratio: 920 / 795; }
+.about-daily-clock > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.daily-clock-hand {
+  transform-origin: 0 0;
+  animation: daily-clock-turn 288s linear infinite;
+  animation-play-state: inherit;
+}
+.daily-clock-minute { animation-duration: 24s; }
+.daily-clock-second { animation-duration: 8s; }
+@keyframes daily-clock-turn { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .daily-clock-hand { animation: none; }
+  .daily-clock-label { opacity: 1 !important; }
+}
+.about-object-button { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; touch-action: pan-y; -webkit-tap-highlight-color: transparent; }
+.about-object-button:focus-visible { outline: 1px dashed #f5f5f5; outline-offset: 5px; border-radius: 12px; }
+.about-object-motion { position: absolute; display: block; inset: 0; }
+.about-object-motion img { display: block; width: 100%; height: 100%; object-fit: fill; pointer-events: none; -webkit-user-drag: none; user-select: none; }
+.about-interactive-object[data-active='true'] { z-index: 2; }
+.about-object-note { position: absolute; z-index: 3; pointer-events: none; }
+.about-object-note img { display: block; width: 100%; height: 100%; object-fit: contain; }
+@media (max-width: 767px) {
+  .about-reference-objects { position: relative; top: auto; left: auto; width: 100%; height: auto; }
+  .about-object-note { min-width: 150px; height: auto !important; }
+  .about-object-note-ipad, .about-object-note-camera { left: auto !important; right: 2%; }
+  .about-object-note img { height: auto; }
+}

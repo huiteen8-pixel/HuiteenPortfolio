@@ -27,6 +27,7 @@ const productionContentSecurityPolicy = [
 ].join('; ');
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   output: 'standalone',
   poweredByHeader: false,
   outputFileTracingRoot: process.cwd(),
