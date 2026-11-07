@@ -1,0 +1,11 @@
+/* All typography, margins, chapter grids and image treatment come directly
+   from the ICU case study. Only project-specific media arrangements differ. */
+.campus-case-with-notes{align-items:start}
+.campus-case-with-notes .icu-case-service-notes{position:sticky;top:120px;padding-top:32px}
+.campus-case-phones{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;padding:40px 4%;background:#f3f5ef;border-radius:12px}
+.campus-case-phones .icu-case-image{background:transparent;border-radius:16px}
+.campus-case-links{display:flex;flex-wrap:wrap;gap:16px;margin-top:40px}
+.campus-case-links a{display:inline-flex;align-items:center;min-height:56px;padding:16px 24px;border-radius:99px;background:var(--case-accent);color:#fff;font-size:20px;line-height:1.3}
+.campus-case-links a:hover{filter:brightness(1.1)}
+.campus-case-links a:focus-visible{outline:2px solid var(--case-accent);outline-offset:5px}
+@media(max-width:767px){.campus-case-with-notes .icu-case-service-notes{position:static;padding-top:22px}.campus-case-phones{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 14px;padding:24px 16px}.campus-case-links a{font-size:18px}.campus-case-links{margin-top:28px}}

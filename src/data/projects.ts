@@ -193,7 +193,7 @@ const originalProjects: Project[] = [
     year: '2026',
     role: '场景与角色假设 / 服务系统设计 / 信息减负策略 / 响应模式设计 / 界面原型',
     summary:
-      '情绪地图是一套面向白领与商务人士情绪状态的服务设计系统，关注他们在通勤、会议、任务切换、客户沟通和信息接收中的压力变化，并尝试让系统根据不同状态调整信息密度、交互节奏与服务入口。',
+      '情绪地图面向职场与城市通勤情境，通过高负荷、切换与恢复三种响应模式，探索服务如何根据当下状态调整信息密度、视觉层级与行动提示。',
     question:
       '当职场用户处于焦虑、疲惫、决策压力或信息过载状态时，工作服务系统如何判断“此刻应该给多少信息”，并以更低压力的方式提供下一步支持？',
     contributions: [
@@ -204,12 +204,12 @@ const originalProjects: Project[] = [
     outcome:
       '最终，情绪地图把情绪识别、信息减负和模式响应机制转化为具体界面，使工作服务不只是展示任务和消息，而能根据用户当下状态提供更合适的行动支持。',
     images: [
-      visual('/projects/moodlens/design-background.png', 'Project Introduction｜设计背景', '情绪地图是一套面向白领与商务人士情绪状态的服务设计系统，关注他们在通勤、会议、任务切换、客户沟通和信息接收中的压力变化，并尝试让系统根据不同状态调整信息密度、交互节奏与服务入口。', 'wide', undefined, 'large'),
+      visual('/projects/moodlens/design-background.png', 'Project Introduction｜设计背景', '情绪地图面向职场与城市通勤情境，通过高负荷、切换与恢复三种响应模式，探索服务如何根据当下状态调整信息密度、视觉层级与行动提示。', 'wide', undefined, 'large'),
       visual('/projects/moodlens/user-research.png', 'Research Framing｜研究框架', '基于项目中的场景与角色假设，梳理职场人群在工作日中可能出现的焦虑、疲惫、低动力、决策压力和信息过载。不同假设状态对应完整任务信息、简化路径或低压力下一步提醒等不同设计方向，仍需后续真实用户研究验证。', 'wide', '02 Research Framing｜研究框架', 'large'),
       visual('/projects/moodlens/scenario-story.png', 'Scenario Story｜用户情景故事', '用户情景故事描绘商务人士在一天工作中从通勤、会议准备、消息堆叠、任务切换到寻求支持的过程，帮助定位系统介入的关键节点：什么时候应该减少信息，什么时候应该突出优先级，什么时候应该提供可执行的下一步。', 'wide', '03 Scenario Story｜用户情景故事', 'large'),
       visual('/projects/moodlens/information-load-reduction.png', 'Information Load Reduction｜信息减负对比', '项目将“信息减负”作为核心策略：当用户处于高压力或低能量状态时，系统不继续堆叠内容，而是主动降低信息密度、减少选择数量、弱化视觉刺激，并优先呈现最关键的下一步。', 'wide', '04 Information Load Reduction｜信息减负对比', 'large'),
       visual('/projects/moodlens/system-evolution.png', 'System Evolution｜系统递进', '系统递进展示了情绪地图从基础工作信息展示，到状态识别，再到个性化响应的演化逻辑。项目不是简单记录情绪，而是将情绪状态转化为任务组织、提醒节奏和服务入口调整依据。', 'wide', '05 System Evolution｜系统递进', 'large'),
-      visual('/projects/moodlens/response-modes.png', 'Response Modes｜模式响应', '系统根据不同情绪状态切换响应模式：稳定状态下提供完整工作信息，焦虑状态下降低信息密度，迷失状态下强化任务路径，低动力状态下提供轻量行动提示，高压状态下优先呈现支持入口。', 'wide', '06 Response Modes｜响应机制', 'large'),
+      visual('/projects/moodlens/response-modes.png', 'Response Modes｜模式响应', '三种响应模式分别对应高负荷、行动切换与恢复阶段：减少次要内容，突出当前路线与关键决策，并在压力降低后开放环境与探索信息。', 'wide', '06 Response Modes｜响应机制', 'large'),
       visual('/projects/moodlens/final-interface.png', 'Final Interface｜页面展示', '最终页面将前面的情绪识别、信息减负和模式响应机制转化为具体界面。整体视觉采用柔和色调、低压力留白和轻量化信息层级，让白领与商务人士在不同状态下获得更适合当下的工作支持。', 'wide', '07 Final Interface｜最终成果', 'full'),
     ],
   },
@@ -254,7 +254,7 @@ const originalProjects: Project[] = [
   },
   {
     id: 'data-visualization',
-    index: '06',
+    index: '07',
     logo: 'M/E',
     group: 'Visual',
     title: 'Music and Economics',
@@ -281,13 +281,13 @@ const originalProjects: Project[] = [
   },
   {
     id: 'digital-table',
-    index: '07',
+    index: '06',
     logo: 'DT',
     group: 'Concept',
     title: '数字餐桌',
     english: 'The Table',
     category: 'Critical Digital Art / 3D Interactive Narrative',
-    year: '2026',
+    year: '2025',
     role: '批判性叙事 / 3D 场景 / 交互机制 / 展示材料整理',
     summary:
       '《The Table / 数字餐桌》是一项以共餐场景为核心的批判性数字艺术项目。作品将餐桌视为现实关系发生的微型社会场域，通过 3D 场景、动态视觉反馈与交互叙事，探讨数字信息如何侵入亲密空间并加剧真实疏离。',
@@ -364,13 +364,10 @@ const originalProjects: Project[] = [
 ];
 
 
-// Split the former making archive into the four named works in the category table.
+// Keep the selected 3D work from the original making archive.
 const makingArchive = originalProjects.find(project => project.id === 'other-skills')!;
 const archiveWorks = [
-  { id: 'report-design', title: '战报设计', english: 'Report Design', group: 'Visual' as const, image: 1, category: 'Editorial Design / Information Design' },
   { id: 'scene-modeling', title: '三维场景建模', english: '3D Scene Modeling', group: 'Making' as const, image: 0, category: '3D Modeling / Spatial Design' },
-  { id: 'handmade-book', title: '手工书', english: 'Handmade Book', group: 'Making' as const, image: 2, category: 'Book Design / Material Experiments' },
-  { id: 'hand-drawing', title: '手绘作品', english: 'Hand Drawing', group: 'Making' as const, image: 3, category: 'Drawing / Form Studies' },
 ];
 export const projects: Project[] = [
   ...originalProjects.filter(project => project.id !== 'other-skills'),

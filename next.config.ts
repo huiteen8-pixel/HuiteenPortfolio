@@ -30,6 +30,7 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   output: 'standalone',
   poweredByHeader: false,
+  images: { qualities: [75, 90] },
   outputFileTracingRoot: process.cwd(),
   // Runtime analytics data is mounted separately in production. Never let a
   // developer database, local secrets, logs, or Codex backup files enter a
@@ -48,6 +49,10 @@ const nextConfig: NextConfig = {
             : []),
         ],
       },
+      ...(process.env.NODE_ENV === 'development' ? [{
+        source: '/projects/:path*',
+        headers: [{ key: 'X-Frame-Options', value: 'SAMEORIGIN' }],
+      }] : []),
     ];
   },
 };

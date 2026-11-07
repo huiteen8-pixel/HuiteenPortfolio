@@ -1,0 +1,7 @@
+.visual-project-gallery{--case-accent:#0289fb;padding-bottom:100px}
+.visual-project-meta{font-size:15px;line-height:1.5;color:#777;margin-bottom:24px}
+.visual-project-intro{font-size:22px;line-height:1.75;margin-top:22px;max-width:780px;color:#666}
+.visual-project-images{display:flex;flex-direction:column;gap:72px;margin:46px auto 0;width:min(92%,1200px)}
+.visual-project-images .icu-case-figure{width:100%;margin-inline:auto}
+.visual-project-images .icu-case-figure:has(img[alt='Music and Economics 图表细节']){max-width:770px}
+@media(max-width:767px){.visual-project-meta{font-size:12px}.visual-project-intro{font-size:18px;line-height:1.7}.visual-project-images{width:calc(100% - 24px);gap:40px;margin-top:24px}.visual-project-gallery{padding-bottom:70px}}

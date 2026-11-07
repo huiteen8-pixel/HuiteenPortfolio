@@ -16,18 +16,11 @@ export const workCategories = [
     projectIds: ['moodlens', 'emotional-lens', 'digital-table'],
   },
   {
-    slug: 'visuals-information', index: '03', title: 'Visuals & Information', lines: ['Visuals', '& Information'],
-    chinese: '视觉与信息设计', range: '07—09',
-    description: '运用图表、角色、版式与视觉语言，让复杂信息更清晰、形象更鲜明。',
-    disciplines: 'Data Visualization / Character Design / Editorial Design',
-    projectIds: ['data-visualization', 'heytea-character', 'report-design'],
-  },
-  {
-    slug: 'material-digital-making', index: '04', title: 'Material & Digital Making', lines: ['Material &', 'Digital Making'],
-    chinese: '跨媒介创作', range: '10—12',
-    description: '展示空间塑造、材料实验、实体制作与造型基础。',
-    disciplines: '3D Modeling / Handmade Books / Drawing',
-    projectIds: ['scene-modeling', 'handmade-book', 'hand-drawing'],
+    slug: 'visuals-making', index: '03', title: 'Visuals & Making', lines: ['Visuals', '& Making'],
+    chinese: '视觉与造型创作', range: '07—09',
+    description: '图表、角色与三维场景，以作品图像呈现视觉表达与造型探索。',
+    disciplines: 'Data Visualization / Character Design / 3D Modeling',
+    projectIds: ['data-visualization', 'heytea-character', 'scene-modeling'],
   },
 ] as const;
 
@@ -35,3 +28,6 @@ export type WorkCategory = typeof workCategories[number];
 export function categoryProjects(category: WorkCategory) {
   return category.projectIds.map(id => projects.find(project => project.id === id)!);
 }
+
+// Reading order matches the category pages, including category boundaries.
+export const orderedProjects = workCategories.flatMap(category => categoryProjects(category));
